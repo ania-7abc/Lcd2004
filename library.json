@@ -1,0 +1,21 @@
+{
+  "name": "Lcd2004",
+  "version": "1.0.0",
+  "description": "A clear, lightweight library for liquid crystal displays that is easy to set up.",
+  "keywords": ["lcd", "display", "arduino", "character", "memory-efficient"],
+  "authors": [
+    {
+      "name": "tui00",
+      "email": "egor5f421@mail.ru"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/Lcd2004"
+  },
+  "homepage": "https://github.com/yourusername/Lcd2004",
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*",
+  "headers": "lcd2004.h"
+}
