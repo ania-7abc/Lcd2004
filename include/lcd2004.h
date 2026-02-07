@@ -172,9 +172,11 @@ public:
     {
       digitalWrite(RS, LOW);
       sendLowHalf(3);
-      delay(4);
+      delayMicroseconds(4063);
       sendLowHalf(3);
+      delayMicroseconds(63);
       sendLowHalf(3);
+      sendLowHalf(2);
     }
 #endif // DISABLE_4_BIT_MODE
 
