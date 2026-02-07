@@ -14,6 +14,7 @@ Avalible #define-s:
 * LCD_D_DISABLE_SET_POSITION_FUNCTION
 * LCD_D_DISABLE_PRE_INIT_DELAY
 * LCD_D_DISABLE_PIN_MODE
+* LCD_D_DISABLE_FONT_SELECTION
 * LCD_D_REMOVE_COLS_AND_ROWS
 * LCD_D_FULL_ACCESS
 * LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
@@ -37,6 +38,7 @@ Avalible #define-s:
 #define LCD_D_DISABLE_4_LINES_SUPPORT
 #define LCD_D_DISABLE_SET_POSITION_FUNCTION
 #define LCD_D_DISABLE_PRE_INIT_DELAY
+#define LCD_D_DISABLE_FONT_SELECTION
 #define LCD_D_REMOVE_COLS_AND_ROWS
 #endif // LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
 
@@ -149,9 +151,9 @@ public:
 #ifdef LCD_D_REMOVE_COLS_AND_ROWS
       uint8_t rows,
 #endif // LCD_D_REMOVE_COLS_AND_ROWS
-#ifndef DISABLE_FONT_SELECTION
+#ifndef LCD_D_DISABLE_FONT_SELECTION
       uint8_t font = LCD_FONT_5X8,
-#endif // DISABLE_FONT_SELECTION
+#endif // LCD_D_DISABLE_FONT_SELECTION
       uint8_t _ = 0)
   {
 #ifndef LCD_D_DISABLE_PRE_INIT_DELAY
@@ -178,11 +180,11 @@ public:
              | 16
 #endif // LCD_D_DISABLE_4_BIT_MODE
              | ((rows != 1) << 3)
-#ifndef DISABLE_FONT_SELECTION
+#ifndef LCD_D_DISABLE_FONT_SELECTION
              | (font << 2)
 #else
              | 0
-#endif // DISABLE_FONT_SELECTION
+#endif // LCD_D_DISABLE_FONT_SELECTION
     ); // Function set: 8/4-bit, n-line, 5x8 font.
 
     sendByte(LCD_CMD_ENTRY_MODE_SET | 2); // Entry mod set: increment DDRAM addres, no display shift.
