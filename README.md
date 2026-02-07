@@ -11,6 +11,7 @@
 
 ## Установка
 Библиотека доступна в PlatformIO по имени tui00/Lcd2004
+
 Если нужно установить в Arduino IDE нажмите Sketch → Include Library → Add .ZIP Library и выбирете zip с библиотекой
 
 ## Feedback
