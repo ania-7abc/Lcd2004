@@ -1,8 +1,8 @@
 # Lcd2004
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/tui00/library/Lcd2004.svg)](https://registry.platformio.org/libraries/tui00/Lcd2004)
-[![GitHub License](https://img.shields.io/github/license/tui00/Lcd2004)](https://github.com/tui00/Lcd2004/blob/main/LICENSE)
-[![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/tui00/Lcd2004/latest/total)](https://github.com/tui00/Lcd2004/releases/latest)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tui00/Lcd2004)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/ania_7/library/Lcd2004.svg)](https://registry.platformio.org/libraries/ania_7/Lcd2004)
+[![GitHub License](https://img.shields.io/github/license/ania_7/Lcd2004)](https://github.com/ania_7/Lcd2004/blob/main/LICENSE)
+[![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/ania_7/Lcd2004/latest/total)](https://github.com/ania_7/Lcd2004/releases/latest)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ania_7/Lcd2004)
 
 A clean, lightweight library for liquid crystal displays that is easy to set up
 
@@ -10,12 +10,12 @@ A clean, lightweight library for liquid crystal displays that is easy to set up
 Take a look at the examples
 
 ## Installation
-The library is available in PlatformIO named tui00/Lcd2004
+The library is available in PlatformIO named ania_7/Lcd2004
 
 If you want to install it in the Arduino IDE, click Sketch → Include Library → Add .ZIP Library and select the zip with the library
 
 ## Feedback
-If you find a bug, create an [Issue](https://github.com/tui00/Lcd2004/issues). If you want to get an answer to the problem faster, write to me in [Telegram](https://t.me/tui00abc)
+If you find a bug, create an [Issue](https://github.com/ania_7/Lcd2004/issues). If you want to get an answer to the problem faster, write to me in [Telegram](https://t.me/ania_7abc)
 
 If you write to Telegram, it's better to just send a link to [Telegraph](https://telegra.ph)
 
