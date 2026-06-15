@@ -1,4 +1,4 @@
-#include "../bestf.h"
+#include "bestf/bestf.h"
 
 #define LCD_D_USE_BUFFER
 #include <lcd2004.h>
@@ -26,7 +26,8 @@ TEST(avalibleForWrite)
     TEST_START
     lcd.setPosition(10, 1);
     int x = lcd.availableForWrite();
-    PRINT("Avalible for write: %d", x);
+    PRINT("Avalible for write: ");
+    PRINT(x);
     ASSUME(x == (LCD_S_BUFFER_SIZE - 0x4A));
     END;
 }

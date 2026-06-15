@@ -1,4 +1,4 @@
-#include "../bestf.h"
+#include "bestf/bestf.h"
 #include <lcd2004.h>
 
 #define TEST_START                                       \

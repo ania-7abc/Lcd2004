@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 
 Avalible #define-s:
@@ -21,66 +23,135 @@ Avalible #define-s:
 * LCD_D_FULL_ACCESS
 * LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
 * LCD_D_DISABLE_RESET_FUNCTION
+* LCD_D_NO_I2C
+* LCD_S_BUFFER_SIZE
 
 */
 
-#pragma once
 #include <Arduino.h>
 
 #include <inttypes.h>
 
 #ifdef LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
+#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
 #define LCD_D_DISABLE_SPECIAL_CHARACTERS
+#endif
+#ifndef LCD_D_DISABLE_PRINT
 #define LCD_D_DISABLE_PRINT
+#endif
+#ifndef LCD_D_DISABLE_4_BIT_MODE
 #define LCD_D_DISABLE_4_BIT_MODE
+#endif
+#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
 #define LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
+#endif
+#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
 #define LCD_D_DISABLE_CLEAR_FUNCTION
+#endif
+#ifndef LCD_D_DISABLE_RETURN_HOME_FUNCTION
 #define LCD_D_DISABLE_RETURN_HOME_FUNCTION
+#endif
+#ifndef LCD_D_DISABLE_CUSTOM_CHARACTERS
 #define LCD_D_DISABLE_CUSTOM_CHARACTERS
+#endif
+#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
 #define LCD_D_DISABLE_AUTO_LINE_BREAK
+#endif
+#ifndef LCD_D_DISABLE_4_LINES_SUPPORT
 #define LCD_D_DISABLE_4_LINES_SUPPORT
+#endif
+#ifndef LCD_D_DISABLE_SET_POSITION_FUNCTION
 #define LCD_D_DISABLE_SET_POSITION_FUNCTION
+#endif
+#ifndef LCD_D_DISABLE_PRE_INIT_DELAY
 #define LCD_D_DISABLE_PRE_INIT_DELAY
+#endif
+#ifndef LCD_D_DISABLE_FONT_SELECTION
 #define LCD_D_DISABLE_FONT_SELECTION
+#endif
+#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
 #define LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#endif
+#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
 #define LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#undef LCD_D_USE_BUFFER
+#endif
+#ifndef LCD_D_DISABLE_RESET_FUNCTION
 #define LCD_D_DISABLE_RESET_FUNCTION
+#endif
+#ifdef LCD_D_USE_BUFFER
+#undef LCD_D_USE_BUFFER
+#endif
 #endif // LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
 
 #ifdef LCD_D_DISABLE_SET_POSITION_FUNCTION
+#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
 #define LCD_D_DISABLE_AUTO_LINE_BREAK
+#endif
+#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
 #define LCD_D_DISABLE_SPECIAL_CHARACTERS
+#endif
+#ifndef LCD_D_DISABLE_CUSTOM_CHARACTERS
 #define LCD_D_DISABLE_CUSTOM_CHARACTERS
-#endif // LCD_D_DISABLE_SET_POSITION_FUNCTION
+#endif
+#endif
 
 #ifdef LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
 #define LCD_D_DISABLE_AUTO_LINE_BREAK
+#endif
+#ifndef LCD_D_DISABLE_4_LINES_SUPPORT
 #define LCD_D_DISABLE_4_LINES_SUPPORT
-#elif defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && defined(LCD_D_DISABLE_4_LINES_SUPPORT)
+#endif
+#else
+#if defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && defined(LCD_D_DISABLE_4_LINES_SUPPORT)
+#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
 #define LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#endif
+#endif
+#endif
 
 #ifdef LCD_D_REMOVE_CUR_X_AND_Y_VARS
+#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
 #define LCD_D_DISABLE_AUTO_LINE_BREAK
+#endif
+#ifdef LCD_D_USE_BUFFER
 #undef LCD_D_USE_BUFFER
-#elif defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && !defined(LCD_D_USE_BUFFER)
+#endif
+#else
+#if defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && !defined(LCD_D_USE_BUFFER)
+#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
 #define LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#endif // LCD_D_REMOVE_CUR_X_AND_Y_VARS
+#endif
+#endif
+#endif
 
 #ifdef LCD_D_DISABLE_AUTO_LINE_BREAK
+#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
 #define LCD_D_DISABLE_SPECIAL_CHARACTERS
-#endif // LCD_D_DISABLE_AUTO_LINE_BREAK
+#endif
+#endif
 
 #ifdef LCD_D_DISABLE_PRINT
+#ifdef LCD_D_USE_BUFFER
 #undef LCD_D_USE_BUFFER
-#endif // LCD_D_DISABLE_PRINT
+#endif
+#endif
+
+#ifdef LCD_D_DISABLE_4_BIT_MODE
+#ifndef LCD_D_NO_I2C
+#define LCD_D_NO_I2C
+#endif
+#endif
 
 #ifdef LCD_D_USE_BUFFER
 #ifndef LCD_S_BUFFER_SIZE
 #define LCD_S_BUFFER_SIZE 0x50
-#endif // LCD_S_BUFFER_SIZE
-#endif // LCD_D_USE_BUFFER
+#endif
+#endif
+
+#ifndef LCD_D_NO_I2C
+#include <Wire.h>
+#endif
 
 #define LCD_CMD_CLEAR_DISPLAY 0x1
 #define LCD_CMD_RETURN_HOME 0x2
@@ -111,6 +182,11 @@ public:
 #ifndef LCD_D_DISABLE_4_BIT_MODE
   bool four_bit_mode = false;
 #endif // LCD_D_DISABLE_4_BIT_MODE
+#ifndef LCD_D_NO_I2C
+  bool i2c_mode = false;
+  uint8_t i2c_data;
+  uint8_t i2c_addr;
+#endif // LCD_D_NO_I2C
 
 #ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
   bool display_en = true, cursor_en = false, cursor_blink = false;
@@ -125,34 +201,44 @@ public:
 #endif                          // LCD_D_REMOVE_CUR_X_AND_Y_VARS
 
 #ifdef LCD_D_USE_BUFFER
-  uint8_t position = 0; // Buffer position.
-  uint8_t buffer[0x4F]; // Buffer.
-#endif                  // LCD_D_USE_BUFFER
+  uint8_t position = 0;              // Buffer position.
+  uint8_t buffer[LCD_S_BUFFER_SIZE]; // Buffer.
+#endif                               // LCD_D_USE_BUFFER
+
+  void custom_dw(uint8_t pin, bool state)
+  {
+#ifndef LCD_D_NO_I2C
+    if (i2c_mode)
+      bitWrite(i2c_data, pin, state);
+    else
+#endif // LCD_D_NO_I2C
+      digitalWrite(pin, state);
+  }
 
   void sendByte(uint8_t byte, bool is_data = false)
   {
-    digitalWrite(RS, is_data);
+    custom_dw(RS, is_data);
 
-    digitalWrite(D4, byte & 16);
-    digitalWrite(D5, byte & 32);
-    digitalWrite(D6, byte & 64);
-    digitalWrite(D7, byte & 128);
+    custom_dw(D4, byte & 16);
+    custom_dw(D5, byte & 32);
+    custom_dw(D6, byte & 64);
+    custom_dw(D7, byte & 128);
 
 #ifndef LCD_D_DISABLE_4_BIT_MODE
     if (four_bit_mode)
       pulseE();
 
-    sendLowHalf(byte);
+    sendNibble(byte);
   }
 
-  void sendLowHalf(uint8_t byte)
+  void sendNibble(uint8_t byte)
   {
 #endif // LCD_D_DISABLE_4_BIT_MODE
 
-    digitalWrite(D0, byte & 1);
-    digitalWrite(D1, byte & 2);
-    digitalWrite(D2, byte & 4);
-    digitalWrite(D3, byte & 8);
+    custom_dw(D0, byte & 1);
+    custom_dw(D1, byte & 2);
+    custom_dw(D2, byte & 4);
+    custom_dw(D3, byte & 8);
 
 #ifndef LCD_D_DISABLE_4_BIT_MODE
     pulseE();
@@ -162,9 +248,29 @@ public:
   {
 #endif // LCD_D_DISABLE_4_BIT_MODE
 
-    digitalWrite(E, HIGH);
+#ifndef LCD_D_NO_I2C
+    if (i2c_mode)
+    {
+      custom_dw(E, HIGH);
+      Wire.beginTransmission(i2c_addr);
+      Wire.write(i2c_data);
+      Wire.endTransmission(true);
+
+      delayMicroseconds(3);
+
+      custom_dw(E, LOW);
+      Wire.beginTransmission(i2c_addr);
+      Wire.write(i2c_data);
+      Wire.endTransmission(true);
+
+      delayMicroseconds(37);
+      return;
+    }
+#endif // LCD_D_NO_I2C
+
+    custom_dw(E, HIGH);
     delayMicroseconds(3);
-    digitalWrite(E, LOW);
+    custom_dw(E, LOW);
 
     delayMicroseconds(37);
   }
@@ -193,13 +299,13 @@ public:
 #ifndef LCD_D_DISABLE_4_BIT_MODE
     if (four_bit_mode)
     {
-      digitalWrite(RS, LOW);
-      sendLowHalf(3);
+      custom_dw(RS, LOW);
+      sendNibble(3);
       delayMicroseconds(4063);
-      sendLowHalf(3);
+      sendNibble(3);
       delayMicroseconds(63);
-      sendLowHalf(3);
-      sendLowHalf(2);
+      sendNibble(3);
+      sendNibble(2);
     }
 #endif // LCD_D_DISABLE_4_BIT_MODE
 
@@ -420,7 +526,7 @@ public:
     pinMode(D7, OUTPUT);
 #endif // LCD_D_DISABLE_PIN_MODE
 
-    digitalWrite(E, LOW);
+    custom_dw(E, LOW);
 
     this->RS = RS;
     this->E = E;
@@ -449,6 +555,20 @@ public:
     four_bit_mode = true;
   }
 #endif
+
+#ifndef LCD_D_NO_I2C
+#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
+  Lcd2004(uint8_t addr, uint8_t cols, uint8_t rows) : Lcd2004(0, 2, 4, 5, 6, 7, cols, rows)
+#else
+  Lcd2004(uint8_t addr) : Lcd2004(0, 2, 4, 5, 6, 7)
+#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+  {
+    four_bit_mode = true;
+    i2c_mode = true;
+    i2c_data = 1 << 3;
+    i2c_addr = addr;
+  }
+#endif // LCD_D_NO_I2C
 
   ~Lcd2004() {}
 };
