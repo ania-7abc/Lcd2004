@@ -6,81 +6,96 @@
 
 A clean, lightweight library for liquid crystal displays that is easy to set up
 
-## Usage
-Take a look at the examples
+## 📖 Documentation
 
-### Available `#define` options and their effects
+### Installation
 
-- **`LCD_D_DISABLE_SPECIAL_CHARACTERS`**  
-  Disables handling of `\n`, `\r`, `\b` as special commands. They are printed as ordinary characters; cursor position does not change.
+**PlatformIO**  
+Add to `platformio.ini`:
+```ini
+lib_deps = ania-7abc/Lcd2004
+```
 
-- **`LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS`**  
-  Enables classical terminal behavior: `\n` moves down, `\r` returns to column 0, `\b` deletes previous character. Without this macro, extra handling (e.g., `\n` also issues `\r`) is added.
+**Arduino IDE**  
+Download ZIP from [GitHub Releases](https://github.com/ania-7abc/Lcd2004/releases) and install via `Sketch → Include Library → Add .ZIP Library`.
 
-- **`LCD_D_DISABLE_PRINT`**  
-  Removes inheritance from the `Print` class. You cannot use `print()` or `println()`; only `write(uint8_t)` works. Saves code space.
+---
 
-- **`LCD_D_DISABLE_4_BIT_MODE`**  
-  Disables 4‑bit mode, forcing 8‑bit parallel interface. Requires all 8 data pins (D0–D7). Automatically disables I2C.
+### Constructors
 
-- **`LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL`**  
-  Removes methods to turn display/cursor on/off and cursor blink. Display and cursor are always on (default state after init).
+| Mode | Constructor | Description |
+|------|-------------|-------------|
+| **8‑bit parallel** | `Lcd2004(RS, E, D0..D7, cols, rows)` | Full 8‑bit data bus. Uses all D0–D7 pins. |
+| **4‑bit parallel** | `Lcd2004(RS, E, D4, D5, D6, D7, cols, rows)` | 4‑bit data bus (D4–D7). Saves 4 pins. |
+| **I2C (PCF8574)** | `Lcd2004(addr, cols, rows)` | Standard I2C backpack with bit mapping: `(RS,RW(0),E,DB7,DB6,DB5,DB4,BL)`. Bus: SDA, SCL. |
 
-- **`LCD_D_DISABLE_CLEAR_FUNCTION`**  
-  Removes `clear()` method. Screen cannot be cleared programmatically; you must overwrite or reset.
+All constructors automatically call `pinMode()` (can be disabled by `LCD_D_DISABLE_PIN_MODE`).
 
-- **`LCD_D_DISABLE_RETURN_HOME_FUNCTION`**  
-  Removes `returnHome()` method. Cursor cannot return to (0,0) except by using `setPosition()`.
+---
 
-- **`LCD_D_DISABLE_CUSTOM_CHARACTERS`**  
-  Removes `saveCustomChar()` method. Cannot store custom character bitmaps in CGRAM. Saves Flash/RAM.
+### Public Methods
 
-- **`LCD_D_DISABLE_AUTO_LINE_BREAK`**  
-  Disables automatic line wrapping when cursor reaches end of line. Text continues beyond column limit (undefined behavior).
+| Method | Description | Notes |
+|--------|-------------|-------|
+| `init(font = LCD_FONT_5X8)` | Initialises display. Must be called once in `setup()`. Optional font: `LCD_FONT_5X8` or `LCD_FONT_5X10`. | |
+| `clear()` | Clears screen and returns home. | Disabled by `LCD_D_DISABLE_CLEAR_FUNCTION`. |
+| `returnHome()` | Moves cursor to (0,0) without clearing. | Disabled by `LCD_D_DISABLE_RETURN_HOME_FUNCTION`. |
+| `setPosition(x, y)` | Moves cursor to column `x`, row `y`. | Disabled by `LCD_D_DISABLE_SET_POSITION_FUNCTION`. |
+| `setOn(bool on)` | Turns display on/off. | Disabled by `LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL`. |
+| `setCursor(bool enable, bool blink)` | Controls cursor visibility and blinking. | Same macro. |
+| `saveCustomChar(uint8_t code, uint8_t bitmap[8])` | Stores custom character in CGRAM (`code` 0…7). | Disabled by `LCD_D_DISABLE_CUSTOM_CHARACTERS`. |
+| `write(uint8_t byte)` | Writes one character (inherited from `Print`). | |
+| `print()` / `println()` | Available if `Print` not disabled. | Disabled by `LCD_D_DISABLE_PRINT`. |
+| `flush()` | Sends buffered data to display. | Only when `LCD_D_USE_BUFFER` is defined. |
+| `reset()` | Soft reset: clears, returns home, sets position (0,0). | Disabled by `LCD_D_DISABLE_RESET_FUNCTION`. |
 
-- **`LCD_D_DISABLE_4_LINES_SUPPORT`**  
-  Treats display as having only 2 lines (or 1), even if hardware has 4. Saves code for smaller displays.
+---
 
-- **`LCD_D_DISABLE_SET_POSITION_FUNCTION`**  
-  Removes `setPosition(x, y)` method. Cursor positioning is impossible; rely on auto‑line break or sequential writes.
+### Configuration Macros
 
-- **`LCD_D_DISABLE_PRE_INIT_DELAY`**  
-  Skips the 40 ms delay at the start of `init()`. Faster startup, but may cause unreliable initialization on some LCD modules.
+Define any of these **before** including `Lcd2004.h` to trim features and save memory.
 
-- **`LCD_D_DISABLE_PIN_MODE`**  
-  Prevents calling `pinMode()` for control pins in the constructor. You must set pin modes externally before creating the object. Saves code.
+| Macro | Effect |
+|-------|--------|
+| `LCD_D_DISABLE_SPECIAL_CHARACTERS` | No handling of `\n`, `\r`, `\b`. |
+| `LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS` | Classical terminal behaviour (no extra corrections). |
+| `LCD_D_DISABLE_PRINT` | Remove `Print` inheritance. Only `write()` remains. |
+| `LCD_D_DISABLE_4_BIT_MODE` | Force 8‑bit mode. I2C automatically disabled. |
+| `LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL` | No `setOn()`/`setCursor()`. Display always on. |
+| `LCD_D_DISABLE_CLEAR_FUNCTION` | No `clear()`. |
+| `LCD_D_DISABLE_RETURN_HOME_FUNCTION` | No `returnHome()`. |
+| `LCD_D_DISABLE_CUSTOM_CHARACTERS` | No `saveCustomChar()`. |
+| `LCD_D_DISABLE_AUTO_LINE_BREAK` | No automatic line wrap. |
+| `LCD_D_DISABLE_4_LINES_SUPPORT` | Treat display as 2 lines max. |
+| `LCD_D_DISABLE_SET_POSITION_FUNCTION` | No `setPosition()`. |
+| `LCD_D_DISABLE_PRE_INIT_DELAY` | Skip 40 ms init delay (faster, less reliable). |
+| `LCD_D_DISABLE_PIN_MODE` | Do not call `pinMode()`. Set pins externally. |
+| `LCD_D_DISABLE_FONT_SELECTION` | Ignore `font` parameter, always 5×8. |
+| `LCD_D_REMOVE_COLS_AND_ROWS_VARS` | Remove `cols`, `rows` members. Disables auto line break & 4‑line support. |
+| `LCD_D_REMOVE_CUR_X_AND_Y_VARS` | Remove `cur_x`, `cur_y`. Disables auto line break & buffer. |
+| `LCD_D_USE_BUFFER` | Enable internal buffer. Use `flush()` to output. |
+| `LCD_D_FULL_ACCESS` | Make protected members public (low‑level hacking). |
+| `LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS` | Ultra minimal: only `init()` and `write()`. |
+| `LCD_D_DISABLE_RESET_FUNCTION` | Remove `reset()`. |
+| `LCD_D_NO_I2C` | Completely disable I2C (no `Wire.h`). |
+| `LCD_S_BUFFER_SIZE` | Set buffer size (default 0x50). Used only with `LCD_D_USE_BUFFER`. |
 
-- **`LCD_D_DISABLE_FONT_SELECTION`**  
-  Disables font choice (5×8 vs 5×10). Always uses 5×8 font; the `font` parameter in `init()` is ignored. Saves code.
+---
 
-- **`LCD_D_REMOVE_COLS_AND_ROWS_VARS`**  
-  Removes storage of `cols` and `rows` member variables. Auto line break and 4‑line support are also disabled. Saves RAM.
+### Example
 
-- **`LCD_D_REMOVE_CUR_X_AND_Y_VARS`**  
-  Removes `cur_x` and `cur_y` cursor position variables. Auto line break and buffer are disabled. Saves RAM.
+```cpp
+#include <Lcd2004.h>
 
-- **`LCD_D_USE_BUFFER`**  
-  Enables an internal buffer for output. Writes go to buffer; call `flush()` to send to display. Improves speed, uses RAM (`LCD_S_BUFFER_SIZE` bytes).
+Lcd2004 lcd(0x27, 16, 2);
 
-- **`LCD_D_FULL_ACCESS`**  
-  Makes all protected members (`RS`, `E`, `D0`–`D7`, etc.) public. Allows low‑level access for advanced hacking. Use with caution.
+void setup() {
+    lcd.init();
+    lcd.print("Hello, world!");
+}
 
-- **`LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS`**  
-  Ultra‑minimal mode. Disables nearly all features (special characters, `Print`, 4‑bit mode, display control, clear, home, custom chars, auto line break, 4‑line support, setPosition, pre‑init delay, font selection, remove vars, buffer, reset). Only `init()` and basic `write()` remain.
-
-- **`LCD_D_DISABLE_RESET_FUNCTION`**  
-  Removes `reset()` method. Cannot soft‑reset the display; only power‑cycle or re‑init. Saves code.
-
-- **`LCD_D_NO_I2C`**  
-  Disables I2C support completely. `Wire.h` is not included, and the I2C constructor is unavailable. Only parallel mode works. Saves code.
-
-- **`LCD_S_BUFFER_SIZE`**  
-  Sets the size of the internal buffer when `LCD_D_USE_BUFFER` is defined. Default is `0x50` (80 bytes). Larger buffer stores more characters but consumes more RAM.
-
-## Installation
-The library is available in PlatformIO named ania-7abc/Lcd2004
-
-If you want to install it in the Arduino IDE, click Sketch → Include Library → Add .ZIP Library and select the zip with the library
+void loop() {}
+```
 
 ## Feedback
 If you find a bug, create an [Issue](https://github.com/ania-7abc/Lcd2004/issues). If you want to get an answer to the problem faster, write to me in [Telegram](https://t.me/ania_7a)
