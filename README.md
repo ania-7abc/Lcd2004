@@ -27,7 +27,7 @@ Download ZIP from [GitHub Releases](https://github.com/ania-7abc/Lcd2004/release
 |------|-------------|-------------|
 | **8‑bit parallel** | `Lcd2004(RS, E, D0..D7, cols, rows)` | Full 8‑bit data bus. Uses all D0–D7 pins. |
 | **4‑bit parallel** | `Lcd2004(RS, E, D4, D5, D6, D7, cols, rows)` | 4‑bit data bus (D4–D7). Saves 4 pins. |
-| **I2C (PCF8574)** | `Lcd2004(addr, cols, rows)` | Standard I2C backpack with bit mapping: `(RS,RW(0),E,DB7,DB6,DB5,DB4,BL)`. Bus: SDA, SCL. |
+| **I2C (PCF8574)** | `Lcd2004(addr, cols, rows)` | Standard I2C backpack. Bus: SDA, SCL. Need to call `Wire.begin()` before `init()`. |
 
 All constructors automatically call `pinMode()` (can be disabled by `LCD_D_DISABLE_PIN_MODE`).
 
@@ -90,6 +90,7 @@ Define any of these **before** including `Lcd2004.h` to trim features and save m
 Lcd2004 lcd(0x27, 16, 2);
 
 void setup() {
+    Wire.begin();
     lcd.init();
     lcd.print("Hello, world!");
 }
