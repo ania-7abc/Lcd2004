@@ -48,7 +48,7 @@ All constructors automatically call `pinMode()` (can be disabled by `LCD_D_DISAB
 | `print()` / `println()` | Available if `Print` not disabled. | Disabled by `LCD_D_DISABLE_PRINT`. |
 | `flush()` | Sends buffered data to display. | Only when `LCD_D_USE_BUFFER` is defined. |
 | `reset()` | Soft reset: clears, returns home, sets position (0,0). | Disabled by `LCD_D_DISABLE_RESET_FUNCTION`. |
-| `set_backlight(bool on)` | Turns the display backlight on/off. | Available only when `LCD_D_BACKLIGHT_CONTROL_SUPPORT` is defined |
+| `setBacklight(bool on)` | Turns the display backlight on/off. | Available only when `LCD_D_BACKLIGHT_CONTROL_SUPPORT` is defined |
 
 ---
 

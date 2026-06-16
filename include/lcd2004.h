@@ -150,12 +150,6 @@ Avalible #define-s:
 #endif
 #endif
 
-#ifdef LCD_D_USE_BUFFER
-#ifndef LCD_S_BUFFER_SIZE
-#define LCD_S_BUFFER_SIZE 0x50
-#endif
-#endif
-
 #ifndef LCD_D_NO_I2C
 #include <Wire.h>
 #endif
@@ -215,7 +209,7 @@ public:
 
 #ifdef LCD_D_USE_BUFFER
   uint8_t position = 0;              // Buffer position.
-  uint8_t buffer[LCD_S_BUFFER_SIZE]; // Buffer.
+  uint8_t buffer[0x68]; // Buffer.
 #endif                               // LCD_D_USE_BUFFER
 
   void custom_dw(uint8_t pin, bool state)
@@ -345,7 +339,7 @@ public:
 #endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
 
 #ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-    set_backlight(true);
+    setBacklight(true);
 #endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
 #ifndef LCD_D_DISABLE_CLEAR_FUNCTION
     clear();
@@ -359,7 +353,7 @@ public:
   void clear()
   {
 #ifdef LCD_D_USE_BUFFER
-    for (int i = 0; i < LCD_S_BUFFER_SIZE; i++)
+    for (int i = 0; i < 0x68; i++)
       buffer[i] = ' ';
 #else
     sendByte(LCD_CMD_CLEAR_DISPLAY); // Clear display.
@@ -492,18 +486,18 @@ public:
   }
 
 #ifdef LCD_D_USE_BUFFER
-  virtual int availableForWrite()
-  {
-    return LCD_S_BUFFER_SIZE - position;
-  }
-
   virtual void flush()
   {
     sendByte(LCD_CMD_RETURN_HOME); // Return home.
     delayMicroseconds(1483);
 
-    for (int i = 0; i < LCD_S_BUFFER_SIZE; i++)
+    for (int i = 0; i < (rows == 2 ? 0x68 : 0x50); i++)
     {
+      if (i == 0x28 && rows == 2)
+      {
+        i = 0x40;
+        sendByte(LCD_CMD_SET_DDRAM_ADDRESS | 0x40);
+      }
       sendByte(buffer[i], true);
       delayMicroseconds(40);
     }
@@ -526,7 +520,7 @@ public:
 #endif // LCD_D_DISABLE_RESET_FUNCTION
 
 #ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-  void set_backlight(bool on)
+  void setBacklight(bool on)
   {
     custom_dw(BLA, on);
 #ifndef LCD_D_NO_I2C
