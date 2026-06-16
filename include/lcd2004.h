@@ -491,9 +491,9 @@ public:
     sendByte(LCD_CMD_RETURN_HOME); // Return home.
     delayMicroseconds(1483);
 
-    for (int i = 0; i < (rows == 2 ? 0x68 : 0x50); i++)
+    for (int i = 0; i < (rows == 1 ? 0x50 : 0x68); i++)
     {
-      if (i == 0x28 && rows == 2)
+      if (i == 0x28 && rows != 1)
       {
         i = 0x40;
         sendByte(LCD_CMD_SET_DDRAM_ADDRESS | 0x40);
