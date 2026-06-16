@@ -48,6 +48,7 @@ All constructors automatically call `pinMode()` (can be disabled by `LCD_D_DISAB
 | `print()` / `println()` | Available if `Print` not disabled. | Disabled by `LCD_D_DISABLE_PRINT`. |
 | `flush()` | Sends buffered data to display. | Only when `LCD_D_USE_BUFFER` is defined. |
 | `reset()` | Soft reset: clears, returns home, sets position (0,0). | Disabled by `LCD_D_DISABLE_RESET_FUNCTION`. |
+| `set_backlight(bool on)` | Turns the display backlight on/off. | Available only when `LCD_D_BACKLIGHT_CONTROL_SUPPORT` is defined |
 
 ---
 
@@ -79,6 +80,7 @@ Define any of these **before** including `Lcd2004.h` to trim features and save m
 | `LCD_D_DISABLE_RESET_FUNCTION` | Remove `reset()`. |
 | `LCD_D_NO_I2C` | Completely disable I2C (no `Wire.h`). |
 | `LCD_S_BUFFER_SIZE` | Set buffer size (default 0x50). Used only with `LCD_D_USE_BUFFER`. |
+| `LCD_D_BACKLIGHT_CONTROL_SUPPORT` | Enables backlight control |
 
 ---
 

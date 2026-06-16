@@ -25,6 +25,7 @@ Avalible #define-s:
 * LCD_D_DISABLE_RESET_FUNCTION
 * LCD_D_NO_I2C
 * LCD_S_BUFFER_SIZE
+* LCD_D_BACKLIGHT_CONTROL_SUPPORT
 
 */
 
@@ -80,6 +81,12 @@ Avalible #define-s:
 #endif
 #ifdef LCD_D_USE_BUFFER
 #undef LCD_D_USE_BUFFER
+#endif
+#ifndef LCD_D_NO_I2C
+#define LCD_D_NO_I2C
+#endif
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+#undef LCD_D_BACKLIGHT_CONTROL_SUPPORT
 #endif
 #endif // LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
 
@@ -177,7 +184,13 @@ protected:
 public:
 #endif // LCD_D_FULL_ACCESS
 
-  uint8_t RS, E, D0, D1, D2, D3, D4, D5, D6, D7; // Pins.
+  // Pins
+  uint8_t RS, E,
+      D0, D1, D2, D3,
+      D4, D5, D6, D7;
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+  uint8_t BLA;
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
 
 #ifndef LCD_D_DISABLE_4_BIT_MODE
   bool four_bit_mode = false;
@@ -331,10 +344,15 @@ public:
     sendByte(LCD_CMD_DISPLAY_CONTROL | 4);
 #endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
 
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+    set_backlight(true);
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
     clear();
 #ifdef LCD_D_USE_BUFFER
     flush();
 #endif // LCD_D_USE_BUFFER
+#endif // LCD_D_DISABLE_CLEAR_FUNCTION
   }
 
 #ifndef LCD_D_DISABLE_CLEAR_FUNCTION
@@ -507,11 +525,31 @@ public:
   }
 #endif // LCD_D_DISABLE_RESET_FUNCTION
 
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+  void set_backlight(bool on)
+  {
+    custom_dw(BLA, on);
+#ifndef LCD_D_NO_I2C
+    if (i2c_mode)
+    {
+      Wire.beginTransmission(i2c_addr);
+      Wire.write(on << 3);
+      Wire.endTransmission(true);
+    }
+#endif // LCD_D_NO_I2C
+  }
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+
+  Lcd2004(uint8_t RS, uint8_t E,
+          uint8_t D0, uint8_t D1, uint8_t D2, uint8_t D3,
+          uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7,
 #ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-  Lcd2004(uint8_t RS, uint8_t E, uint8_t D0, uint8_t D1, uint8_t D2, uint8_t D3, uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7, uint8_t cols, uint8_t rows)
-#else
-  Lcd2004(uint8_t RS, uint8_t E, uint8_t D0, uint8_t D1, uint8_t D2, uint8_t D3, uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7)
+          uint8_t cols, uint8_t rows,
 #endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+          uint8_t BLA,
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+          uint8_t _ = 0)
   {
 #ifndef LCD_D_DISABLE_PIN_MODE
     pinMode(RS, OUTPUT);
@@ -524,6 +562,9 @@ public:
     pinMode(D5, OUTPUT);
     pinMode(D6, OUTPUT);
     pinMode(D7, OUTPUT);
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+    pinMode(BLA, OUTPUT);
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
 #endif // LCD_D_DISABLE_PIN_MODE
 
     custom_dw(E, LOW);
@@ -543,29 +584,57 @@ public:
     this->cols = cols;
     this->rows = rows;
 #endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+    this->BLA = BLA;
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
   }
 
 #ifndef LCD_D_DISABLE_4_BIT_MODE
+  Lcd2004(uint8_t RS, uint8_t E,
+          uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7,
 #ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-  Lcd2004(uint8_t RS, uint8_t E, uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7, uint8_t cols, uint8_t rows) : Lcd2004(RS, E, D4, D5, D6, D7, D4, D5, D6, D7, cols, rows)
-#else
-  Lcd2004(uint8_t RS, uint8_t E, uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7) : Lcd2004(RS, E, D4, D5, D6, D7, D4, D5, D6, D7)
+          uint8_t cols, uint8_t rows,
 #endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+          uint8_t BLA,
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+          uint8_t _ = 0) : Lcd2004(RS, E,
+                                   D4, D5, D6, D7,
+                                   D4, D5, D6, D7,
+#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
+                                   cols, rows,
+#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+                                   BLA,
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+                                   _)
   {
     four_bit_mode = true;
   }
 #endif
 
 #ifndef LCD_D_NO_I2C
+  Lcd2004(uint8_t addr,
 #ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-  Lcd2004(uint8_t addr, uint8_t cols, uint8_t rows) : Lcd2004(0, 2, 4, 5, 6, 7, cols, rows)
-#else
-  Lcd2004(uint8_t addr) : Lcd2004(0, 2, 4, 5, 6, 7)
+          uint8_t cols, uint8_t rows,
 #endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+          uint8_t _ = 0) : Lcd2004(0, 2, 4, 5, 6, 7,
+#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
+                                   cols, rows,
+#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+                                   3,
+#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+                                   _)
   {
     four_bit_mode = true;
     i2c_mode = true;
+#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
+    i2c_data = 0;
+#else
     i2c_data = 1 << 3;
+#endif // LCD_D_NO_I2C
     i2c_addr = addr;
   }
 #endif // LCD_D_NO_I2C
