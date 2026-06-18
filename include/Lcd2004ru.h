@@ -1,10 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <lcd2004.h>
-
-#define LCD_USER_USED 1
-#define LCD_FREE 0
+#include <core/slots_cont.h>
 
 #define CANONICAL_GLYPH_GROUPS_SIZE 21
 const uint16_t canonicalGlyphGroups[CANONICAL_GLYPH_GROUPS_SIZE][2] PROGMEM = {
@@ -49,7 +46,7 @@ const uint8_t littleGlyphs[] PROGMEM = {
     0x40, 0x7c, 0xc0, 0x1c, 0x10, 0x10, 0x10, 0x7c, 0x7c, 0x40, 0x78, 0x40, 0x7c, 0x7c, 0x40, 0x78, 0x40, 0xfc, 0x04, 0x7c, 0x50, 0x70, 0x00, 0x7c,
     0x50, 0x70, 0x00, 0x7c, 0x7c, 0x50, 0x70, 0x00, 0x00, 0x54, 0x54, 0x54, 0x38, 0x00, 0x7c, 0x10, 0x7c, 0x44, 0x7c, 0x00, 0x5c, 0x34, 0x14, 0x7c};
 
-class Lcd2004ru : public Lcd2004
+class Lcd2004ru : public _Lcd2004sc
 {
 private:
     // Utf-8 Parser //
@@ -88,35 +85,6 @@ private:
         buf <<= 6;
         buf |= byte & mask;
         return remaining == 0;
-    }
-
-    // Get CGRAM slot logic //
-    uint16_t slotCode[8] = {LCD_FREE};
-    uint8_t slotCycle = 0;
-
-    uint8_t getFreeSlot(uint16_t code, bool ignore_self = false)
-    {
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            if (slotCode[i] == code && !ignore_self)
-                return i;
-            if (slotCode[i] == LCD_FREE)
-            {
-                slotCode[i] = code;
-                return i;
-            }
-        }
-
-        uint8_t old = slotCycle;
-        while (slotCode[slotCycle] == LCD_USER_USED)
-        {
-            slotCycle = (slotCycle + 1) % 8;
-            if (slotCycle == old) // User is greedy and took all slots. Greedy!
-                for (int i = 0; i < 8; i++)
-                    slotCode[i] = LCD_FREE;
-        }
-        slotCode[slotCycle] = code;
-        return slotCycle;
     }
 
     // Get canonical glyph //
@@ -189,19 +157,5 @@ private:
     }
 
 public:
-    using Lcd2004::Lcd2004;
-
-    void saveCustomChar(uint8_t code, uint8_t symbol[8])
-    {
-        if (slotCode[code] != LCD_FREE && slotCode[code] != LCD_USER_USED)
-            slotCode[getFreeSlot(slotCode[code], true)] = slotCode[code]; // move to another place
-        slotCode[code] = LCD_USER_USED;
-        Lcd2004::saveCustomChar(code, symbol);
-    }
-
-    void freeCustomChar(uint8_t code)
-    {
-        if (slotCode[code] == LCD_USER_USED)
-            slotCode[code] = LCD_FREE;
-    }
+    using _Lcd2004sc::_Lcd2004sc;
 };

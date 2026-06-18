@@ -138,12 +138,6 @@ Avalible #define-s:
 #endif
 #endif
 
-#ifdef LCD_D_DISABLE_PRINT
-#ifdef LCD_D_USE_BUFFER
-#undef LCD_D_USE_BUFFER
-#endif
-#endif
-
 #ifdef LCD_D_DISABLE_4_BIT_MODE
 #ifndef LCD_D_NO_I2C
 #define LCD_D_NO_I2C
@@ -490,7 +484,11 @@ public:
   }
 
 #ifdef LCD_D_USE_BUFFER
+#ifndef LCD_D_DISABLE_PRINT
+  virtual void flush() override
+#else
   virtual void flush()
+#endif // LCD_D_DISABLE_PRINT
   {
     sendByte(LCD_CMD_RETURN_HOME); // Return home.
     delayMicroseconds(1483);
