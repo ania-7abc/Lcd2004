@@ -111,6 +111,13 @@ This extension adds automatic Cyrillic (Russian) support to the base `Lcd2004` l
 - If all 8 CGRAM slots are occupied by your own custom characters, the library will be forced to **clear all slots** to make room for Cyrillic. This will erase **ALL** your custom characters
 - For proper operation, **leave at least 1–2 slots free** or avoid character saving altogether
 
+### `freeCustomChar(uint8_t code)`
+
+Marks a user‑occupied CGRAM slot as free, allowing the library to reuse it for Cyrillic glyphs.
+
+- **Parameters:** `code` – slot number (0..7).
+- **Note:** Only works if the slot was previously marked as `LCD_USER_USED`.
+
 ### Example
 
 ```cpp
