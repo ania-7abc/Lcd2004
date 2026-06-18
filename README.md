@@ -100,6 +100,39 @@ void setup() {
 void loop() {}
 ```
 
+## 🇷🇺 Russian Language Support (`lcd2004ru.h`)
+
+This extension adds automatic Cyrillic (Russian) support to the base `Lcd2004` library. It handles UTF‑8 input and manages CGRAM slots for you – no manual glyph creation is needed.
+
+### ⚠️ Important Notes
+
+- The library **automatically uses CGRAM slots** for Cyrillic characters.
+- **Do not use `saveCustomChar()`** while this extension is active – it will interfere with automatic slot management.
+- If all 8 CGRAM slots are occupied by your own custom characters, the library will be forced to **clear all slots** to make room for Cyrillic. This will erase **ALL** your custom characters
+- For proper operation, **leave at least 1–2 slots free** or avoid character saving altogether
+
+### Example
+
+```cpp
+#include <lcd2004ru.h>
+
+Lcd2004ru lcd(0x27, 16, 2);
+
+void setup() {
+    lcd.init();
+    lcd.print("Привет, мир!"); // UTF‑8 string
+}
+```
+
+All other methods (`print`, `setPosition`, `clear`, etc.) work exactly as in the base `Lcd2004` class.
+
+### How It Works
+
+- **UTF‑8 Parsing** – the library intercepts each byte, decodes UTF‑8 sequences, and correctly handles 1‑, 2‑, and 3‑byte characters (4‑byte are ignored).
+- **Glyph Selection** – for Russian letters (А‑Я, а‑я), the library uses built‑in 5×7 pixel patterns stored in Flash. Visually identical Latin and Cyrillic characters (like `P` and `Р`) share the same glyph to save CGRAM space.
+- **Slot Management** – each new non‑ASCII character gets its own CGRAM slot. Existing slots are reused when possible. If no free slots are available, the library tries to reuse unprotected slots. If all slots are occupied by your custom characters, **all slots are cleared** to make room for Cyrillic.
+- **Rendering** – once stored, the character is displayed using its slot number (`0..7`), without any extra code on your side.
+
 ## Feedback
 If you find a bug, create an [Issue](https://github.com/ania-7abc/Lcd2004/issues). If you want to get an answer to the problem faster, write to me in [Telegram](https://t.me/ania_7a)
 

@@ -208,9 +208,9 @@ public:
 #endif                          // LCD_D_REMOVE_CUR_X_AND_Y_VARS
 
 #ifdef LCD_D_USE_BUFFER
-  uint8_t position = 0;              // Buffer position.
+  uint8_t position = 0; // Buffer position.
   uint8_t buffer[0x68]; // Buffer.
-#endif                               // LCD_D_USE_BUFFER
+#endif                  // LCD_D_USE_BUFFER
 
   void custom_dw(uint8_t pin, bool state)
   {
@@ -288,6 +288,8 @@ public:
     sendByte(LCD_CMD_DISPLAY_CONTROL | (display_en << 2) | (cursor_en << 1) | cursor_blink); // Display on/off control.
   }
 #endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
+
+  virtual bool preWrite(uint8_t &byte) { return true; }
 
 public:
   void init(
@@ -439,11 +441,13 @@ public:
 #endif // LCD_D_DISABLE_CUSTOM_CHARACTERS
 
 #ifndef LCD_D_DISABLE_PRINT
-  virtual size_t write(uint8_t byte) override
+  size_t write(uint8_t byte) override
 #else
   size_t write(uint8_t byte)
 #endif // LCD_D_DISABLE_PRINT
   {
+    if (!preWrite(byte))
+      return 1;
 #ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
     if (byte == '\n')
     {
