@@ -198,4 +198,10 @@ public:
         slotCode[code] = LCD_USER_USED;
         Lcd2004::saveCustomChar(code, symbol);
     }
+
+    void freeCustomChar(uint8_t code)
+    {
+        if (slotCode[code] == LCD_USER_USED)
+            slotCode[code] = LCD_FREE;
+    }
 };
