@@ -6,172 +6,126 @@
 
 A clean, lightweight library for liquid crystal displays that is easy to set up
 
-## Lcd2004 — the main conductor
-
-This class rules the display. It can talk to it over 8 wires, 4 wires, or I2C (unless you forbid it). It buddies up with `Print`, so you can shove strings, numbers, and even floats into it via `print()` — unless you chop that feature off to save memory.
-
----
-
-### Constructors — how they look in different universes
-
-All constructors have a dummy trailing parameter `_` (default 0). It just sits there, reserved for future extensions. The other parameters jump in and out depending on what you've defined.
-
-#### 8‑bit mode — always with you
-
-```cpp
-Lcd2004(RS, E, D0,D1,D2,D3, D4,D5,D6,D7, [cols, rows], [BLA], _);
+## Installation
+**PlatformIO** - add to `platformio.ini`:
+```ini
+lib_deps =
+    ania-7abc/Lcd2004
 ```
 
-- If you define `LCD_D_REMOVE_COLS_AND_ROWS_VARS` — the library stops storing the resolution. Then the `cols` and `rows` parameters **disappear** from the constructor. You don't pass them, and the library simply knows they have nowhere to live.
-- If you add `LCD_D_BACKLIGHT_CONTROL_SUPPORT` — a `BLA` (backlight pin) parameter appears right before the `_`.
-- Order: first all pins, then (if present) `cols, rows`, then (if present) `BLA`, then `_`.
+**Arduino IDE** - grab the archive from the [latest release](https://github.com/ania-7abc/Lcd2004/releases/latest) and use *Sketch → Include Library → Add .ZIP Library*
 
-#### 4‑bit mode — alive until you kill it
-
-Available unless `LCD_D_DISABLE_4_BIT_MODE` is defined.
-
+## Hello, world!
 ```cpp
-Lcd2004(RS, E, D4,D5,D6,D7, [cols, rows], [BLA], _);
+#include <Lcd2004.h>
+
+// 4-bit: RS, E, D4, D5, D6, D7, cols, rows
+Lcd2004 lcd(12, 11, 5, 4, 3, 2, 20, 4);
+
+void setup() {
+    lcd.init();
+    lcd.println("Hello, world!");
+}
+
+void loop() {}
 ```
 
-Internally it just calls the 8‑bit constructor, feeding D4–D7 as both high and low nibbles (because in 4‑bit mode the same pins are used for both halves). The same rules for dropping `cols/rows` and adding `BLA` apply.
-
-#### I2C mode — alive until you turn it off
-
-Available unless `LCD_D_NO_I2C` is defined.
+I2C variant - pass the PCF8574 address instead of pins:
 
 ```cpp
-Lcd2004(addr, [cols, rows], _);
+Lcd2004 lcd(0x27, 20, 4);
 ```
 
-Hard‑wired for PCF8574: RS=0, E=2, D4=4, D5=5, D6=6, D7=7, and if backlight support is on, BLA=3.  
-Again, if `LCD_D_REMOVE_COLS_AND_ROWS_VARS` is defined, `cols` and `rows` vanish, and the constructor becomes just `Lcd2004(addr, _);`.
-
----
-
-### `init()` — it can shapeshift too
-
-`init()` is not a fixed function. Its signature dances to the tune of two defines:
+## Привет, мир! (Russian "Hello, world!")
+Cyrillic and UTF-8 support live in `Lcd2004ru`, which builds on `Lcd2004xs`
 
 ```cpp
-void init(
-  [uint8_t rows,]
-  [uint8_t font = LCD_FONT_5X8,]
-  uint8_t _ = 0
-);
+#include <Lcd2004ru.h>
+
+Lcd2004ru lcd(12, 11, 5, 4, 3, 2, 20, 4);
+
+void setup() {
+    lcd.init();
+    lcd.println("Привет, мир!");
+}
+
+void loop() {}
 ```
 
-- If `LCD_D_REMOVE_COLS_AND_ROWS_VARS` is defined — a `rows` parameter appears (because we don't store the resolution, but we still need to know how many lines the display has during initialisation).
-- If `LCD_D_DISABLE_FONT_SELECTION` is **not** defined — a `font` parameter appears (you can choose 5x8 or 5x10).
-- If both conditions are met — `init(rows, font, _)`. If only the first — `init(rows, _)`. If only the second — `init(font, _)`. If none — `init(_)` or just `init()` (since `_` has a default).
+I2C variant:
+```cpp
+Lcd2004ru lcd(0x27, 20, 4);
+```
 
-What does `init()` do inside?  
-- Waits 40 ms, unless `LCD_D_DISABLE_PRE_INIT_DELAY` is defined.
-- Initialises the display in the chosen mode (8/4 bit, number of lines, font).
-- Turns the display on, cursor (if allowed), and if `clear()` is not disabled — clears the screen (or, if the buffer is enabled, just fills it with spaces and then calls `flush()`).
+## Lcd2004xs - eXtra Slots
+The HD44780 has only **8 CGRAM slots** for user-defined characters. `Lcd2004xs` lifts that limit with a virtual slot table:
 
----
+- Up to **255 virtual slots** are addressable - valid codes are `0..254` inclusive
+- A small LRU cache maps virtual codes onto the 8 hardware slots on demand
+- Every glyph you register is stored once in RAM; the driver rotates them into hardware only when a character is actually written
 
-### Other methods — who, where, and when they vanish
+`Lcd2004ru` is a thin UTF-8 layer on top of `Lcd2004xs`. Use `Lcd2004xs` directly when you want the extra slots without the Cyrillic plumbing
 
-#### `clear()` — wipes everything
-- Disappears if `LCD_D_DISABLE_CLEAR_FUNCTION` is defined.
-- Without buffer: sends the clear command immediately.
-- With buffer: fills the buffer with spaces; the actual clear happens on `flush()`.
+## Configuration macros
 
-#### `returnHome()` — back to the start
-- Vanishes with `LCD_D_DISABLE_RETURN_HOME_FUNCTION`.
-- Sends the "home" command and resets internal coordinates (if stored) and buffer position.
+All tuning is compile-time via `#define`. Define them **before** including the headers
 
-#### `reset()` — full reset
-- Gone if `LCD_D_DISABLE_RESET_FUNCTION` is defined.
-- Does `clear()`, then (if buffer is used) `flush()`, then `setPosition(0,0)` (if available).
+| Macro | Default | Effect |
+||||
+| `LCD_NO_I2C` | off | Strips all `Wire` code. Saves ~1.8 KB flash and ~180 B RAM. |
+| `LCD_LOW_MEM` | off | Removes backlight, cursor, blink, and `preWrite`/hook code. Saves ~360–410 B flash. |
+| `LCD_USE_BUFFER` | off | Keeps a shadow copy of the screen. Enables flicker-free updates via `flush()`. |
+| `LCD_VIRTUAL_SLOTS` | `16` | Number of virtual glyph slots in `Lcd2004xs`. Max `255` (codes `0..254`). |
+| `LCD_MAX_RESOLUTION` | `20 * 4` | Upper bound on characters, used to size the `Lcd2004gfx` buffer. |
+| `LCD_GFX_LARGE` | off | In `Lcd2004gfx`: 2×3 pixel blocks per cell instead of 2×2. |
 
-#### `setOn(bool)` and `setCursor(bool, bool)` — screen and cursor control
-- Both disappear if `LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL` is defined.
-- The first turns the display on/off, the second enables the cursor and its blinking.
 
-#### `setPosition(x, y)` — jump to a spot
-- Disappears with `LCD_D_DISABLE_SET_POSITION_FUNCTION`.
-- Computes the DDRAM address considering columns, rows, and the 4‑line addressing trick (addresses: 0x00, 0x40, 0x14, 0x54 — unless 4‑line support is disabled via `LCD_D_DISABLE_4_LINES_SUPPORT`).  
-- Updates `cur_x`, `cur_y` (if they are not removed) and buffer position (if buffer exists).
 
-#### `saveCustomChar(code, symbol[8])` — store your own glyph
-- Vanishes with `LCD_D_DISABLE_CUSTOM_CHARACTERS`.
-- Writes 8 bytes to CGRAM under the given `code` (0–7). After writing, it restores the cursor to its previous position using `setPosition()` (if it's still alive).
+## Flash and RAM footprint
 
-#### `setBacklight(bool)` — backlight control
-- Appears **only** if `LCD_D_BACKLIGHT_CONTROL_SUPPORT` is defined.
-- Toggles the pin (or changes the bit in the I2C byte).
+Measured on ATmega328P, full 20×4 configuration, Hello-world sketch:
 
-#### `write(uint8_t)` — the main worker method
-It's always there (even if `Print` is disabled, it remains as a plain method, just not overriding a virtual function).  
-Its behaviour is a tangle of conditionals:
+| Configuration                          | Flash (B) | RAM (B) |
+|----------------------------------------|-----------|---------|
+| Full (I2C, buffer, low-mem off)        | 4716      | 367     |
+| Full without buffer                    | 4554      | 262     |
+| `LCD_NO_I2C`                           | 2712      | 80      |
+| `LCD_NO_I2C` + `LCD_USE_BUFFER`        | 2874      | 185     |
+| `LCD_LOW_MEM` + I2C                    | 4142      | 254     |
+| `LCD_LOW_MEM`                          | 2348      | 72      |
+| `LCD_LOW_MEM` + `LCD_USE_BUFFER` + I2C | 4292      | 359     |
+| `LCD_LOW_MEM` + `LCD_USE_BUFFER`       | 2498      | 177     |
 
-- If special character handling is **not** disabled (`LCD_D_DISABLE_SPECIAL_CHARACTERS`), it recognises `\n`, `\r`, `\b`:
-  - `\n` — move to next line. Unless the classical special‑characters mode is on (`LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS`), it also inserts a `\r` so the cursor goes to the beginning of the line.
-  - `\r` — move to column 0.
-  - `\b` — step back. If classical mode is off, it also overwrites the previous character with a space (so it acts like a real backspace).
-- For a regular character:
-  - If buffer is enabled (`LCD_D_USE_BUFFER`) — stores the byte in the buffer at the current position.
-  - Without buffer — sends the byte directly to the display with a tiny delay (4 µs).
-- If auto line break is **not** disabled (`LCD_D_DISABLE_AUTO_LINE_BREAK`), after writing it checks whether the cursor has hit the right edge. If so, it calls `setPosition(0, ++cur_y)` and jumps to the next line.
+The leanest useful build (`LCD_LOW_MEM` + `LCD_NO_I2C`) is **2348 B flash / 72 B RAM**
 
-#### `flush()` — drain the buffer
-- Lives only when `LCD_D_USE_BUFFER` is defined.
-- Walks through the buffer and sends all bytes to the display, respecting 1‑line and 4‑line addressing. The buffer is not cleared afterwards — if you want it empty, call `clear()`.
+## Versus LiquidCrystal
 
----
+`LiquidCrystal` and its ecosystem (`LiquidCrystal_I2C`, `LiquidCrystal_I2C_RUS`) are older and fragmented. `Lcd2004` is one library that covers what those three do together - and more
 
-### And what about dependencies? They're tricky.
+| Feature                   | Lcd2004 | LiquidCrystal | LiquidCrystal_I2C | LiquidCrystal_I2C_RUS |
+|---------------------------|:-------:|:-------------:|:-----------------:|:---------------------:|
+| 4-bit / 8-bit bus         |    ✅    |       ✅       |         ❌         |           ❌           |
+| I2C (PCF8574)             |    ✅    |       ❌       |         ✅         |           ✅           |
+| Single API for both buses |    ✅    |       -       |         -         |           -           |
+| Backlight control in API  |    ✅    |       ❌       |         ✅         |           ✅           |
+| `Print` integration       |    ✅    |       ✅       |      partial      |        partial        |
+| Screen buffer             |    ✅    |       ❌       |         ❌         |           ❌           |
+| Custom glyphs beyond 8    |    ✅    |       ❌       |         ❌         |           ❌           |
+| UTF-8 input               |    ✅    |       ❌       |         ❌         |           ❌           |
+| Cyrillic                  |    ✅    |       ❌       |         ❌         |           ✅           |
+| Compile-time trimming     |    ✅    |       ❌       |         ❌         |           ❌           |
+| Canonical glyph dedup     |    ✅    |       ❌       |         ❌         |           ❌           |
 
-The library twists the knobs for you so you don't shoot yourself in the foot:
+The only column where the older libraries win is raw minimum size. In its smallest build `Lcd2004` still takes a few hundred bytes more flash than `LiquidCrystal` - that is the honest price of carrying UTF-8, virtual slots, buffer support, and a unified bus API. On an ATmega328 the difference disappears into noise; on an ATtiny you may have to choose between features and bytes
 
-- If you disable `setPosition()` — auto line break and custom characters are automatically disabled (without positioning they are useless).
-- If you disable auto line break — special characters are automatically disabled (because `\n` without wrapping makes no sense).
-- If you remove the `cols/rows` variables — auto line break and 4‑line support are automatically disabled. And if you disable both auto line break and 4‑line support — the library will define `LCD_D_REMOVE_COLS_AND_ROWS_VARS` itself to save RAM.
-- If you remove `cur_x/cur_y` — auto line break is disabled, and the buffer is forcibly turned off (because without coordinates the buffer doesn't know where to write). If auto line break is off and there's no buffer, the library will automatically remove `cur_x/cur_y`.
-- If you disable 4‑bit mode — I2C also gets disabled (since I2C works through the 4‑bit protocol).
-- There's also the total preset `LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS` — it kills everything it can, including I2C and the buffer, leaving only a naked 8‑bit driver with `init()` and `write()`. Perfect for the tiniest projects.
+## License
+MIT. See [LICENSE](LICENSE)
 
----
-
-That's it. Constructors shift, `init()` dances, methods disappear like magic, and dependencies are twisted into a tight knot that the library unties for you. All so you can squeeze the most out of your Arduino, even if you have only 2 bytes of RAM left.
-
----
-
-## Now about the others — briefly
-
-### Lcd2004gfx — drawing pixels on a character display
-
-This is a tertiary (and heaviest) beast. It requires the **GyverGFX** library and forces you to enable the buffer (`LCD_D_USE_BUFFER`) and disable `Print` (`LCD_D_DISABLE_PRINT`), otherwise it won't compile.
-
-It turns your 20×4 (or whatever) display into a graphical canvas. By default each character is split into **2×2** pixels, so the resolution becomes `(cols*2) × (rows*2)`. If you want taller — define `LCD_GFX_LARGE`, and you'll get **2×3** pixels per character (then `rows*3` in height).
-
-It works simply: draw lines, circles, rectangles — everything from `GyverGFX`, then call `update()`, and the library magically turns your picture into a set of custom characters, stuffs them into slots, and outputs them to the screen. It's magical, but slow — don't expect 60 fps animation.
-
----
-
-### Lcd2004ru — Russian language and UTF-8
-
-A secondary class for those who want to write in Russian. It knows how to parse UTF-8, extract Cyrillic letters, and substitute them with ready‑made patterns (big and small — like on old‑school Soviet displays). Letters that look like Latin ones (`A`, `C`, `O`, etc.) are canonicalised to avoid duplicating the same glyph in the slots.
-
-No new methods — just create an object and `print("Привет!")`. Everything else is done automatically: decoding, drawing glyphs, writing them into free slots.
-
----
-
-### Internal `_Lcd2004sc` — slot manager (and a warning!)
-
-Both `gfx` and `ru` inherit from **`_Lcd2004sc`**, which does not exist in the base `Lcd2004`. This class adds a smart dynamic table: it remembers which custom character lives in which slot, and reuses slots if the same glyph is requested again.
-
-**Important warning:** if you manually mess with the slots (via `saveCustomChar()` with codes 0–7) and occupy all 8 slots, and then `gfx` or `ru` ask for one more — **`_Lcd2004sc` will not gently evict one slot. It will simply throw away all your manual characters and wipe the entire table** to free up space. This is done on purpose to avoid deadlocks. If you don't want such a surprise, either don't interfere with the automatics, or don't occupy all slots with your own hands.
-
-That's all. These two classes are add‑ons to `Lcd2004`; they are not mandatory, but they are useful if you need to draw or write in Russian. And `_Lcd2004sc` is their shared internal kitchen — something worth knowing so you don't get an unexpected reset.
+## Contributing
+If this library saved you some time, a ⭐ on [GitHub](https://github.com/ania-7abc/Lcd2004) is appreciated - it helps the project keep growing
 
 ## Feedback
-If you find a bug, create an [Issue](https://github.com/ania-7abc/Lcd2004/issues). If you want to get an answer to the problem faster, write to me in [Telegram](https://t.me/ania_7a)
-
-If you write to Telegram, it's better to just send a link to [Telegraph](https://telegra.ph)
+If you find a bug, create an [Issue](https://github.com/ania-7abc/Lcd2004/issues)
 
 ### Be sure to specify:
 * If you write by email, Telegram: Library name (Lcd2004)

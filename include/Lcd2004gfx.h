@@ -1,142 +1,121 @@
 #pragma once
 
-#define LCD_D_USE_BUFFER
-#define LCD_D_DISABLE_PRINT
-#include <core/slots_cont.h>
-
 #if __has_include(<GyverGFX.h>)
 #include <GyverGFX.h>
 #else
 #error "Add GyverGFX library to your project to use Lcd2004gfx"
 #endif
 
-// 20 * 4 / 8 * 4 = 40
-// - 20*4 = max resolution
-// - /8 = bits in byte
-// - *4 = 4 pixels per symbol
-#define LCD_GFX_BUFFER_SIZE 40
-
 #define LCD_GFX_PPS_X 2
+
 #ifdef LCD_GFX_LARGE
 #define LCD_GFX_PPS_Y 3
+#define LCD_VIRTUAL_SLOTS 63
 #else
 #define LCD_GFX_PPS_Y 2
+#define LCD_VIRTUAL_SLOTS 15
 #endif
 
-class Lcd2004gfx : private _Lcd2004sc, public GyverGFX
+#ifndef LCD_MAX_RESOLUTION
+#define LCD_MAX_RESOLUTION (20 * 4)
+#endif
+
+#define LCD_GFX_BUFFER_SIZE (LCD_MAX_RESOLUTION / 8 * (LCD_GFX_PPS_X * LCD_GFX_PPS_Y))
+
+#include <Lcd2004xs.h>
+
+class Lcd2004gfx : Lcd2004xs, public GyverGFX
 {
+    uint8_t buffer[LCD_GFX_BUFFER_SIZE] = {};
 
-private:
-    uint8_t buffer[LCD_GFX_BUFFER_SIZE] = {0};
-
-    void bufferWrite(uint16_t x, uint16_t y, bool value)
+    void bufferWrite(const uint16_t x, const uint16_t y, const bool value)
     {
         bitWrite(buffer[(x + y * _w) / 8], x % 8, value);
     }
 
-    bool bufferRead(uint16_t x, uint16_t y)
+    bool bufferRead(const uint16_t x, const uint16_t y) const
     {
         return bitRead(buffer[(x + y * _w) / 8], x % 8);
     }
 
-#ifdef LCD_GFX_LARGE
-    uint8_t generateSymbol(bool lu, bool lc, bool ld, bool ru, bool rc, bool rd)
-    {
-        uint8_t symbol[8] = {0};
-        if (lu)
-            for (uint8_t row = 0; row <= 1; row++)
-                symbol[row] |= 0b11000;
-        if (lc)
-            for (uint8_t row = 3; row <= 4; row++)
-                symbol[row] |= 0b11000;
-        if (ld)
-            for (uint8_t row = 6; row <= 7; row++)
-                symbol[row] |= 0b11000;
-
-        if (ru)
-            for (uint8_t row = 0; row <= 1; row++)
-                symbol[row] |= 0b00011;
-        if (rc)
-            for (uint8_t row = 3; row <= 4; row++)
-                symbol[row] |= 0b00011;
-        if (rd)
-            for (uint8_t row = 6; row <= 7; row++)
-                symbol[row] |= 0b00011;
-        uint16_t code = lu * 32 + lc * 16 + ld * 8 + ru * 4 + rc * 2 + rd;
-        code += 64; // bias
-        code = getFreeSlot(code);
-        Lcd2004::saveCustomChar(code, symbol);
-        return code;
-    }
-#else
-    uint8_t generateSymbol(bool lu, bool ld, bool ru, bool rd)
-    {
-        uint8_t symbol[8] = {0};
-        if (lu)
-            for (uint8_t row = 1; row <= 2; row++)
-                symbol[row] |= 0b11000;
-        if (ld)
-            for (uint8_t row = 5; row <= 6; row++)
-                symbol[row] |= 0b11000;
-        if (ru)
-            for (uint8_t row = 1; row <= 2; row++)
-                symbol[row] |= 0b00011;
-        if (rd)
-            for (uint8_t row = 5; row <= 6; row++)
-                symbol[row] |= 0b00011;
-        uint16_t code = lu * 8 + ru * 4 + ld * 2 + rd;
-        code += 16; // bias
-        code = getFreeSlot(code);
-        Lcd2004::saveCustomChar(code, symbol);
-        return code;
-    }
-#endif
-
 public:
     void init()
     {
-        _Lcd2004sc::init();
-        size(cols * LCD_GFX_PPS_X, rows * LCD_GFX_PPS_Y);
+        Lcd2004xs::init();
+        size(cols_ * LCD_GFX_PPS_X, rows_ * LCD_GFX_PPS_Y);
+
+        for (int i = 1; i < LCD_VIRTUAL_SLOTS + 1; i++)
+        {
+            uint8_t symbol[8] = {};
+
+            // lu, lc, [ld], ru, rc, [rd]
+
+            // @formatter:off
+#ifdef LCD_GFX_LARGE
+            if (i & 32) { symbol[0] |= 0b11000; symbol[1] |= 0b11000; }
+            if (i & 16) { symbol[3] |= 0b11000; symbol[4] |= 0b11000; }
+            if (i & 8) { symbol[6] |= 0b11000; symbol[7] |= 0b11000; }
+            if (i & 4) { symbol[0] |= 0b00011; symbol[1] |= 0b00011; }
+            if (i & 2) { symbol[3] |= 0b00011; symbol[4] |= 0b00011; }
+            if (i & 1) { symbol[6] |= 0b00011; symbol[7] |= 0b00011; }
+#else
+            if (i & 8) { symbol[1] |= 0b11000; symbol[2] |= 0b11000; }
+            if (i & 4) { symbol[5] |= 0b11000; symbol[6] |= 0b11000; }
+            if (i & 2) { symbol[1] |= 0b00011; symbol[2] |= 0b00011; }
+            if (i & 1) { symbol[5] |= 0b00011; symbol[6] |= 0b00011; }
+#endif
+            // @formatter:on
+
+            saveCustomChar(i - 1, symbol);
+        }
     }
 
-    void dot(int x, int y, uint8_t fill = GFX_FILL) override
+    void dot(const int x, const int y, const uint8_t fill = GFX_FILL) override
     {
         bufferWrite(x, y, fill);
     }
 
-    void fill(uint8_t fill = GFX_FILL) override
+    void fill(const uint8_t fill = GFX_FILL) override
     {
-        for (uint8_t i = 0; i < LCD_GFX_BUFFER_SIZE; i++)
-            buffer[i] = fill == GFX_FILL ? 0xFF : 0;
+        for (uint8_t& i : buffer)
+            i = fill == GFX_FILL ? 0xFF : 0;
+    }
+
+    void clear() override
+    {
+        for (uint8_t& i : buffer)
+            i = 0;
     }
 
     void update() override
     {
-        for (uint8_t y = 0; y < rows; y++)
+        for (uint8_t y = 0; y < rows_; y++)
         {
-            _Lcd2004sc::setPosition(0, y);
-            for (uint8_t x = 0; x < cols; x++)
+            setPosition(0, y);
+            for (uint8_t x = 0; x < cols_; x++)
             {
 #ifdef LCD_GFX_LARGE
-                bool lu = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y);
-                bool lc = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 1);
-                bool ld = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 2);
-                bool ru = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y);
-                bool rc = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 1);
-                bool rd = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 2);
-                uint8_t code = generateSymbol(lu, lc, ld, ru, rc, rd);
+                const auto lu = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y);
+                const auto lc = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 1);
+                const auto ld = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 2);
+                const auto ru = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y);
+                const auto rc = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 1);
+                const auto rd = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 2);
+                const uint8_t code = lu * 32 + lc * 16 + ld * 8 + ru * 4 + rc * 2 + rd;
 #else
-                bool lu = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y);
-                bool ld = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 1);
-                bool ru = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y);
-                bool rd = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 1);
-                uint8_t code = generateSymbol(lu, ld, ru, rd);
+                const auto lu = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y);
+                const auto lc = bufferRead(x * LCD_GFX_PPS_X, y * LCD_GFX_PPS_Y + 1);
+                const auto ru = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y);
+                const auto rc = bufferRead(x * LCD_GFX_PPS_X + 1, y * LCD_GFX_PPS_Y + 1);
+                const uint8_t code = lu * 8 + lc * 4 + ru * 2 + rc;
 #endif
-                _Lcd2004sc::write(code);
+                Lcd2004xs::write(code == 0 ? ' ' : loadVirtualChar(code - 1));
             }
         }
-        _Lcd2004sc::flush();
+#ifdef LCD_USE_BUFFER
+        Lcd2004xs::flush();
+#endif
     }
 
-    using _Lcd2004sc::_Lcd2004sc;
+    using Lcd2004xs::Lcd2004xs;
 };

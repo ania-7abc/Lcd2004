@@ -1,150 +1,8 @@
 #pragma once
 
-/*
-
-Avalible #define-s:
-* LCD_D_DISABLE_SPECIAL_CHARACTERS
-* LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS
-* LCD_D_DISABLE_PRINT
-* LCD_D_DISABLE_4_BIT_MODE
-* LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-* LCD_D_DISABLE_CLEAR_FUNCTION
-* LCD_D_DISABLE_RETURN_HOME_FUNCTION
-* LCD_D_DISABLE_CUSTOM_CHARACTERS
-* LCD_D_DISABLE_AUTO_LINE_BREAK
-* LCD_D_DISABLE_4_LINES_SUPPORT
-* LCD_D_DISABLE_SET_POSITION_FUNCTION
-* LCD_D_DISABLE_PRE_INIT_DELAY
-* LCD_D_DISABLE_PIN_MODE
-* LCD_D_DISABLE_FONT_SELECTION
-* LCD_D_REMOVE_COLS_AND_ROWS_VARS
-* LCD_D_REMOVE_CUR_X_AND_Y_VARS
-* LCD_D_USE_BUFFER
-* LCD_D_FULL_ACCESS
-* LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
-* LCD_D_DISABLE_RESET_FUNCTION
-* LCD_D_NO_I2C
-* LCD_S_BUFFER_SIZE
-* LCD_D_BACKLIGHT_CONTROL_SUPPORT
-
-*/
-
 #include <Arduino.h>
 
-#include <inttypes.h>
-
-#ifdef LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
-#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
-#define LCD_D_DISABLE_SPECIAL_CHARACTERS
-#endif
-#ifndef LCD_D_DISABLE_PRINT
-#define LCD_D_DISABLE_PRINT
-#endif
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-#define LCD_D_DISABLE_4_BIT_MODE
-#endif
-#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-#define LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-#endif
-#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
-#define LCD_D_DISABLE_CLEAR_FUNCTION
-#endif
-#ifndef LCD_D_DISABLE_RETURN_HOME_FUNCTION
-#define LCD_D_DISABLE_RETURN_HOME_FUNCTION
-#endif
-#ifndef LCD_D_DISABLE_CUSTOM_CHARACTERS
-#define LCD_D_DISABLE_CUSTOM_CHARACTERS
-#endif
-#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
-#define LCD_D_DISABLE_AUTO_LINE_BREAK
-#endif
-#ifndef LCD_D_DISABLE_4_LINES_SUPPORT
-#define LCD_D_DISABLE_4_LINES_SUPPORT
-#endif
-#ifndef LCD_D_DISABLE_SET_POSITION_FUNCTION
-#define LCD_D_DISABLE_SET_POSITION_FUNCTION
-#endif
-#ifndef LCD_D_DISABLE_PRE_INIT_DELAY
-#define LCD_D_DISABLE_PRE_INIT_DELAY
-#endif
-#ifndef LCD_D_DISABLE_FONT_SELECTION
-#define LCD_D_DISABLE_FONT_SELECTION
-#endif
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#define LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#endif
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#define LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#endif
-#ifndef LCD_D_DISABLE_RESET_FUNCTION
-#define LCD_D_DISABLE_RESET_FUNCTION
-#endif
-#ifdef LCD_D_USE_BUFFER
-#undef LCD_D_USE_BUFFER
-#endif
-#ifndef LCD_D_NO_I2C
-#define LCD_D_NO_I2C
-#endif
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-#undef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-#endif
-#endif // LCD_D_ONLY_INIT_AND_WRITE_FUNCTIONS
-
-#ifdef LCD_D_DISABLE_SET_POSITION_FUNCTION
-#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
-#define LCD_D_DISABLE_AUTO_LINE_BREAK
-#endif
-#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
-#define LCD_D_DISABLE_SPECIAL_CHARACTERS
-#endif
-#ifndef LCD_D_DISABLE_CUSTOM_CHARACTERS
-#define LCD_D_DISABLE_CUSTOM_CHARACTERS
-#endif
-#endif
-
-#ifdef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
-#define LCD_D_DISABLE_AUTO_LINE_BREAK
-#endif
-#ifndef LCD_D_DISABLE_4_LINES_SUPPORT
-#define LCD_D_DISABLE_4_LINES_SUPPORT
-#endif
-#else
-#if defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && defined(LCD_D_DISABLE_4_LINES_SUPPORT)
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#define LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#endif
-#endif
-#endif
-
-#ifdef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
-#define LCD_D_DISABLE_AUTO_LINE_BREAK
-#endif
-#ifdef LCD_D_USE_BUFFER
-#undef LCD_D_USE_BUFFER
-#endif
-#else
-#if defined(LCD_D_DISABLE_AUTO_LINE_BREAK) && !defined(LCD_D_USE_BUFFER)
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#define LCD_D_REMOVE_CUR_X_AND_Y_VARS
-#endif
-#endif
-#endif
-
-#ifdef LCD_D_DISABLE_AUTO_LINE_BREAK
-#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
-#define LCD_D_DISABLE_SPECIAL_CHARACTERS
-#endif
-#endif
-
-#ifdef LCD_D_DISABLE_4_BIT_MODE
-#ifndef LCD_D_NO_I2C
-#define LCD_D_NO_I2C
-#endif
-#endif
-
-#ifndef LCD_D_NO_I2C
+#ifndef LCD_NO_I2C
 #include <Wire.h>
 #endif
 
@@ -159,481 +17,373 @@ Avalible #define-s:
 #define LCD_FONT_5X8 0
 #define LCD_FONT_5X10 1
 
-#ifndef LCD_D_DISABLE_PRINT
 class Lcd2004 : public Print
-#else
-class Lcd2004
-#endif // LCD_D_DISABLE_PRINT
 {
-
-#ifndef LCD_D_FULL_ACCESS
 protected:
-#else
-public:
-#endif // LCD_D_FULL_ACCESS
+    // Pins
+    uint8_t RS_, E_,
+            D0_, D1_, D2_, D3_,
+            D4_, D5_, D6_, D7_;
 
-  // Pins
-  uint8_t RS, E,
-      D0, D1, D2, D3,
-      D4, D5, D6, D7;
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-  uint8_t BLA;
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
+    uint8_t cols_, rows_; // Resolution
 
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-  bool four_bit_mode = false;
-#endif // LCD_D_DISABLE_4_BIT_MODE
-#ifndef LCD_D_NO_I2C
-  bool i2c_mode = false;
-  uint8_t i2c_data;
-  uint8_t i2c_addr;
-#endif // LCD_D_NO_I2C
-
-#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-  bool display_en = true, cursor_en = false, cursor_blink = false;
-#endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-  uint8_t cols, rows; // Resolution.
-#endif                // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-  uint8_t cur_x = 0, cur_y = 0; // Position.
-#endif                          // LCD_D_REMOVE_CUR_X_AND_Y_VARS
-
-#ifdef LCD_D_USE_BUFFER
-  uint8_t position = 0; // Buffer position.
-  uint8_t buffer[0x68]; // Buffer.
-#endif                  // LCD_D_USE_BUFFER
-
-  void custom_dw(uint8_t pin, bool state)
-  {
-#ifndef LCD_D_NO_I2C
-    if (i2c_mode)
-      bitWrite(i2c_data, pin, state);
-    else
-#endif // LCD_D_NO_I2C
-      digitalWrite(pin, state);
-  }
-
-  void sendByte(uint8_t byte, bool is_data = false)
-  {
-    custom_dw(RS, is_data);
-
-    custom_dw(D4, byte & 16);
-    custom_dw(D5, byte & 32);
-    custom_dw(D6, byte & 64);
-    custom_dw(D7, byte & 128);
-
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-    if (four_bit_mode)
-      pulseE();
-
-    sendNibble(byte);
-  }
-
-  void sendNibble(uint8_t byte)
-  {
-#endif // LCD_D_DISABLE_4_BIT_MODE
-
-    custom_dw(D0, byte & 1);
-    custom_dw(D1, byte & 2);
-    custom_dw(D2, byte & 4);
-    custom_dw(D3, byte & 8);
-
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-    pulseE();
-  }
-
-  void pulseE()
-  {
-#endif // LCD_D_DISABLE_4_BIT_MODE
-
-#ifndef LCD_D_NO_I2C
-    if (i2c_mode)
-    {
-      custom_dw(E, HIGH);
-      Wire.beginTransmission(i2c_addr);
-      Wire.write(i2c_data);
-      Wire.endTransmission(true);
-
-      delayMicroseconds(3);
-
-      custom_dw(E, LOW);
-      Wire.beginTransmission(i2c_addr);
-      Wire.write(i2c_data);
-      Wire.endTransmission(true);
-
-      delayMicroseconds(37);
-      return;
-    }
-#endif // LCD_D_NO_I2C
-
-    custom_dw(E, HIGH);
-    delayMicroseconds(3);
-    custom_dw(E, LOW);
-
-    delayMicroseconds(37);
-  }
-
-#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-  void displayOnOffControlCmd()
-  {
-    sendByte(LCD_CMD_DISPLAY_CONTROL | (display_en << 2) | (cursor_en << 1) | cursor_blink); // Display on/off control.
-  }
-#endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-
-  virtual bool preWrite(uint8_t &byte) { return true; }
-
-public:
-  void init(
-#ifdef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-      uint8_t rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifndef LCD_D_DISABLE_FONT_SELECTION
-      uint8_t font = LCD_FONT_5X8,
-#endif // LCD_D_DISABLE_FONT_SELECTION
-      uint8_t _ = 0)
-  {
-#ifndef LCD_D_DISABLE_PRE_INIT_DELAY
-    delay(40);
-#endif // LCD_D_DISABLE_PRE_INIT_DELAY
-
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-    if (four_bit_mode)
-    {
-      custom_dw(RS, LOW);
-      sendNibble(3);
-      delayMicroseconds(4063);
-      sendNibble(3);
-      delayMicroseconds(63);
-      sendNibble(3);
-      sendNibble(2);
-    }
-#endif // LCD_D_DISABLE_4_BIT_MODE
-
-    sendByte(LCD_CMD_FUNCTION_SET
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-             | (!four_bit_mode << 4)
-#else
-             | 16
-#endif // LCD_D_DISABLE_4_BIT_MODE
-             | ((rows != 1) << 3)
-#ifndef LCD_D_DISABLE_FONT_SELECTION
-             | (font << 2)
-#else
-             | 0
-#endif // LCD_D_DISABLE_FONT_SELECTION
-    ); // Function set: 8/4-bit, n-line, 5x8 font.
-
-    sendByte(LCD_CMD_ENTRY_MODE_SET | 2); // Entry mod set: increment DDRAM addres, no display shift.
-
-#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-    displayOnOffControlCmd();
-#else
-    sendByte(LCD_CMD_DISPLAY_CONTROL | 4);
-#endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-    setBacklight(true);
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
-    clear();
-#ifdef LCD_D_USE_BUFFER
-    flush();
-#endif // LCD_D_USE_BUFFER
-#endif // LCD_D_DISABLE_CLEAR_FUNCTION
-  }
-
-#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
-  void clear()
-  {
-#ifdef LCD_D_USE_BUFFER
-    for (int i = 0; i < 0x68; i++)
-      buffer[i] = ' ';
-#else
-    sendByte(LCD_CMD_CLEAR_DISPLAY); // Clear display.
-#endif // LCD_D_USE_BUFFER
-
-#ifndef LCD_D_DISABLE_RETURN_HOME_FUNCTION
-    returnHome(); // Very short init.
-#endif            // LCD_D_DISABLE_RETURN_HOME_FUNCTION
-  }
-#endif // LCD_D_DISABLE_CLEAR_FUNCTION
-
-#ifndef LCD_D_DISABLE_RETURN_HOME_FUNCTION
-  void returnHome()
-  {
-    sendByte(LCD_CMD_RETURN_HOME); // Return home.
-    delayMicroseconds(1483);
-
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-    cur_x = 0;
-    cur_y = 0;
-#endif // LCD_D_REMOVE_CUR_X_AND_Y_VARS
-
-#ifdef LCD_D_USE_BUFFER
-    position = 0;
-#endif // LCD_D_USE_BUFFER
-  }
-#endif // LCD_D_DISABLE_RETURN_HOME_FUNCTION
-
-#ifndef LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-  void setOn(bool on)
-  {
-    display_en = on;
-    displayOnOffControlCmd();
-  }
-  void setCursor(bool on, bool blink)
-  {
-    cursor_en = on;
-    cursor_blink = blink;
-    displayOnOffControlCmd();
-  }
-#endif // LCD_D_DISABLE_DISPLAY_AND_CURSOR_CONTROL
-
-#ifndef LCD_D_DISABLE_SET_POSITION_FUNCTION
-  void setPosition(uint8_t x, uint8_t y)
-  {
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-    x %= cols;
-    y %= rows;
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-
-#ifndef LCD_D_DISABLE_4_LINES_SUPPORT
-    uint8_t addr = ((y % 2) * 0x40) + (cols * (y >= 2)) + x;
-#else
-    uint8_t addr = (y % 2) * 0x40 + x;
-#endif // LCD_D_DISABLE_4_LINES_SUPPORT
-
-    sendByte(LCD_CMD_SET_DDRAM_ADDRESS | addr); // Set DDRAM address.
-
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-    cur_x = x;
-    cur_y = y;
-#endif // LCD_D_REMOVE_CUR_X_AND_Y_VARS
-
-#ifdef LCD_D_USE_BUFFER
-    position = addr;
-#endif // LCD_D_USE_BUFFER
-  }
-#endif // LCD_D_DISABLE_SET_POSITION_FUNCTION
-
-#ifndef LCD_D_DISABLE_CUSTOM_CHARACTERS
-  void saveCustomChar(uint8_t code, uint8_t symbol[8])
-  {
-    sendByte(LCD_CMD_SET_CGRAM_ADDRESS | ((code % 8) << 3));
-    for (uint8_t i = 0; i < 8; i++)
-      sendByte(symbol[i], true);
-
-#ifndef LCD_D_REMOVE_CUR_X_AND_Y_VARS
-    setPosition(cur_x, cur_y); // Set write to DDRAM.
-#else
-    setPosition(0, 0);
-#endif // LCD_D_REMOVE_CUR_X_AND_Y_VARS
-  }
-#endif // LCD_D_DISABLE_CUSTOM_CHARACTERS
-
-#ifndef LCD_D_DISABLE_PRINT
-  size_t write(uint8_t byte) override
-#else
-  size_t write(uint8_t byte)
-#endif // LCD_D_DISABLE_PRINT
-  {
-    if (!preWrite(byte))
-      return 1;
-#ifndef LCD_D_DISABLE_SPECIAL_CHARACTERS
-    if (byte == '\n')
-    {
-      setPosition(cur_x, ++cur_y);
-      cur_y %= rows;
-
-#ifndef LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS
-      write('\r');
-#endif // LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS
-    }
-    else if (byte == '\r')
-      setPosition(cur_x = 0, cur_y);
-    else if (byte == '\b' && cur_x > 0)
-    {
-      setPosition(--cur_x, cur_y);
-
-#ifndef LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS
-      write(' ');
-      setPosition(--cur_x, cur_y);
-#endif // LCD_D_USE_CLASSICAL_SPECIAL_CHARACTERS
-    }
-    else
-#endif // LCD_D_DISABLE_SPECIAL_CHARACTERS
-
-    {
-#ifdef LCD_D_USE_BUFFER
-      buffer[position++] = byte;
-#else
-      sendByte(byte, true);
-      delayMicroseconds(4);
-#endif // LCD_D_USE_BUFFER
-
-#ifndef LCD_D_DISABLE_AUTO_LINE_BREAK
-      if (++cur_x == cols)
-        setPosition(cur_x = 0, ++cur_y);
-#endif // LCD_D_DISABLE_AUTO_LINE_BREAK
-    }
-
-    return 1;
-  }
-
-#ifdef LCD_D_USE_BUFFER
-#ifndef LCD_D_DISABLE_PRINT
-  virtual void flush() override
-#else
-  virtual void flush()
-#endif // LCD_D_DISABLE_PRINT
-  {
-    sendByte(LCD_CMD_RETURN_HOME); // Return home.
-    delayMicroseconds(1483);
-
-    for (int i = 0; i < (rows == 1 ? 0x50 : 0x68); i++)
-    {
-      if (i == 0x28 && rows != 1)
-      {
-        i = 0x40;
-        sendByte(LCD_CMD_SET_DDRAM_ADDRESS | 0x40);
-      }
-      sendByte(buffer[i], true);
-      delayMicroseconds(40);
-    }
-  }
-#endif // LCD_D_USE_BUFFER
-
-#ifndef LCD_D_DISABLE_RESET_FUNCTION
-  void reset()
-  {
-#ifndef LCD_D_DISABLE_CLEAR_FUNCTION
-    clear();
-#endif // LCD_D_DISABLE_CLEAR_FUNCTION
-#ifdef LCD_D_USE_BUFFER
-    flush();
-#endif // LCD_D_USE_BUFFER
-#ifndef LCD_D_DISABLE_SET_POSITION_FUNCTION
-    setPosition(0, 0);
-#endif // LCD_D_DISABLE_SET_POSITION_FUNCTION
-  }
-#endif // LCD_D_DISABLE_RESET_FUNCTION
-
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-  void setBacklight(bool on)
-  {
-    custom_dw(BLA, on);
-#ifndef LCD_D_NO_I2C
-    if (i2c_mode)
-    {
-      Wire.beginTransmission(i2c_addr);
-      Wire.write(on << 3);
-      Wire.endTransmission(true);
-    }
-#endif // LCD_D_NO_I2C
-  }
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-
-  Lcd2004(uint8_t RS, uint8_t E,
-          uint8_t D0, uint8_t D1, uint8_t D2, uint8_t D3,
-          uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7,
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-          uint8_t cols, uint8_t rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-          uint8_t BLA,
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-          uint8_t _ = 0)
-  {
-#ifndef LCD_D_DISABLE_PIN_MODE
-    pinMode(RS, OUTPUT);
-    pinMode(E, OUTPUT);
-    pinMode(D0, OUTPUT);
-    pinMode(D1, OUTPUT);
-    pinMode(D2, OUTPUT);
-    pinMode(D3, OUTPUT);
-    pinMode(D4, OUTPUT);
-    pinMode(D5, OUTPUT);
-    pinMode(D6, OUTPUT);
-    pinMode(D7, OUTPUT);
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-    pinMode(BLA, OUTPUT);
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-#endif // LCD_D_DISABLE_PIN_MODE
-
-    custom_dw(E, LOW);
-
-    this->RS = RS;
-    this->E = E;
-    this->D0 = D0;
-    this->D1 = D1;
-    this->D2 = D2;
-    this->D3 = D3;
-    this->D4 = D4;
-    this->D5 = D5;
-    this->D6 = D6;
-    this->D7 = D7;
-
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-    this->cols = cols;
-    this->rows = rows;
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-    this->BLA = BLA;
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-  }
-
-#ifndef LCD_D_DISABLE_4_BIT_MODE
-  Lcd2004(uint8_t RS, uint8_t E,
-          uint8_t D4, uint8_t D5, uint8_t D6, uint8_t D7,
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-          uint8_t cols, uint8_t rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-          uint8_t BLA,
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-          uint8_t _ = 0) : Lcd2004(RS, E,
-                                   D4, D5, D6, D7,
-                                   D4, D5, D6, D7,
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-                                   cols, rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-                                   BLA,
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-                                   _)
-  {
-    four_bit_mode = true;
-  }
+#ifndef LCD_LOW_MEM
+    int8_t BLA_; // if < 0 no backlight control
 #endif
 
-#ifndef LCD_D_NO_I2C
-  Lcd2004(uint8_t addr,
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-          uint8_t cols, uint8_t rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-          uint8_t _ = 0) : Lcd2004(0, 2, 4, 5, 6, 7,
-#ifndef LCD_D_REMOVE_COLS_AND_ROWS_VARS
-                                   cols, rows,
-#endif // LCD_D_REMOVE_COLS_AND_ROWS_VARS
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-                                   3,
-#endif // LCD_D_BACKLIGHT_CONTROL_SUPPORT
-                                   _)
-  {
-    four_bit_mode = true;
-    i2c_mode = true;
-#ifdef LCD_D_BACKLIGHT_CONTROL_SUPPORT
-    i2c_data = 0;
-#else
-    i2c_data = 1 << 3;
-#endif // LCD_D_NO_I2C
-    i2c_addr = addr;
-  }
-#endif // LCD_D_NO_I2C
+    bool four_bit_mode_ = false;
 
-  ~Lcd2004() {}
+#ifndef LCD_NO_I2C
+    bool i2c_mode_;
+    uint8_t i2c_data_ = 0;
+    uint8_t i2c_addr_ = 0;
+#endif
+
+#ifndef LCD_LOW_MEM
+    bool display_ = true;
+    bool cursor_ = false, cursor_blink_ = false;
+#endif
+
+    uint8_t cur_x_ = 0, cur_y_ = 0; // Position
+
+#ifdef LCD_USE_BUFFER
+    uint8_t position_ = 0; // Buffer position
+    uint8_t buffer_[0x68] = {}; // Buffer
+#endif
+
+#ifdef LCD_NO_I2C
+    static void setPin(const uint8_t pin, const bool state)
+    {
+        digitalWrite(pin, state);
+    }
+#else
+    void setPin(const uint8_t pin, const bool state)
+    {
+        if (i2c_mode_)
+            bitWrite(i2c_data_, pin, state);
+        else
+            digitalWrite(pin, state);
+    }
+#endif
+
+    void sendByte(const uint8_t byte, const bool is_data = false)
+    {
+        setPin(RS_, is_data);
+
+        setPin(D4_, byte & 16);
+        setPin(D5_, byte & 32);
+        setPin(D6_, byte & 64);
+        setPin(D7_, byte & 128);
+
+        if (four_bit_mode_)
+            pulseEnable();
+
+        sendNibble(byte);
+    }
+
+    void sendNibble(const uint8_t byte)
+    {
+        setPin(D0_, byte & 1);
+        setPin(D1_, byte & 2);
+        setPin(D2_, byte & 4);
+        setPin(D3_, byte & 8);
+
+        pulseEnable();
+    }
+
+#ifndef LCD_NO_I2C
+    void pulseEnable()
+    {
+        if (i2c_mode_)
+        {
+            setPin(E_, HIGH);
+            Wire.beginTransmission(i2c_addr_);
+            Wire.write(i2c_data_);
+            Wire.endTransmission(true);
+
+            delayMicroseconds(3);
+
+            setPin(E_, LOW);
+            Wire.beginTransmission(i2c_addr_);
+            Wire.write(i2c_data_);
+            Wire.endTransmission(true);
+
+            delayMicroseconds(37);
+            return;
+        }
+
+        setPin(E_, HIGH);
+        delayMicroseconds(3);
+        setPin(E_, LOW);
+
+        delayMicroseconds(37);
+    }
+#else
+    void pulseEnable() const
+    {
+        setPin(E_, HIGH);
+        delayMicroseconds(3);
+        setPin(E_, LOW);
+
+        delayMicroseconds(37);
+    }
+#endif
+
+#ifndef LCD_LOW_MEM
+    void displayControlCmd()
+    {
+        sendByte(LCD_CMD_DISPLAY_CONTROL | display_ << 2 | cursor_ << 1 | cursor_blink_);
+    }
+#endif
+
+public:
+    void init(const uint8_t font = LCD_FONT_5X8)
+    {
+        delay(40);
+
+        if (four_bit_mode_)
+        {
+            setPin(RS_, LOW);
+            sendNibble(3);
+            delayMicroseconds(4063);
+            sendNibble(3);
+            delayMicroseconds(63);
+            sendNibble(3);
+            sendNibble(2);
+        }
+
+        sendByte(LCD_CMD_FUNCTION_SET | !four_bit_mode_ << 4 | (rows_ != 1) << 3 | font << 2);
+        sendByte(LCD_CMD_ENTRY_MODE_SET | 2); // Entry mod set: increment DDRAM address, no display shift
+        sendByte(LCD_CMD_DISPLAY_CONTROL | 4); // Turn on display
+
+#ifndef LCD_LOW_MEM
+        setBacklight(true);
+#endif
+
+        clear();
+#ifdef LCD_USE_BUFFER
+        flush();
+#endif
+    }
+
+    void clear()
+    {
+#ifdef LCD_USE_BUFFER
+        for (unsigned char& i : buffer_)
+            i = ' ';
+#else
+        sendByte(LCD_CMD_CLEAR_DISPLAY); // Clear display
+#endif
+        delayMicroseconds(1483);
+        returnHome(); // Very short init
+    }
+
+    void returnHome()
+    {
+        sendByte(LCD_CMD_RETURN_HOME); // Return home
+        delayMicroseconds(1483);
+
+        cur_x_ = 0;
+        cur_y_ = 0;
+
+#ifdef LCD_USE_BUFFER
+        position_ = 0;
+#endif
+    }
+
+#ifndef LCD_LOW_MEM
+    void setOn(const bool on)
+    {
+        display_ = on;
+        displayControlCmd();
+    }
+
+    void setCursor(const bool on, const bool blink = false)
+    {
+        cursor_ = on;
+        cursor_blink_ = blink;
+        displayControlCmd();
+    }
+#endif
+
+    void setPosition(uint8_t x, uint8_t y)
+    {
+        x %= cols_;
+        y %= rows_;
+
+        const uint8_t addr = y % 2 * 0x40 + x + cols_ * (y >= 2);
+#ifdef LCD_USE_BUFFER
+        position_ = addr;
+#endif
+        cur_x_ = x;
+        cur_y_ = y;
+
+        sendByte(LCD_CMD_SET_DDRAM_ADDRESS | addr);
+    }
+
+#ifndef LCD_LOW_MEM
+    virtual void saveCustomChar(const uint8_t code, uint8_t symbol[8])
+    {
+        sendByte(LCD_CMD_SET_CGRAM_ADDRESS | (code % 8) << 3);
+        for (uint8_t i = 0; i < 8; i++)
+            sendByte(symbol[i], true);
+
+        setPosition(cur_x_, cur_y_); // Set write to DDRAM, but not CGRAM
+    }
+#endif
+
+protected:
+    /**
+     * Called before outputting a character
+     * @param byte The character to be output
+     * @return Continue outputting the character?
+     */
+    virtual bool preWrite(uint8_t& byte) { return true; }
+
+public:
+    size_t write(uint8_t byte) override
+    {
+#ifndef LCD_LOW_MEM
+        if (!preWrite(byte))
+            return 1;
+
+        if (byte == '\n')
+        {
+            setPosition(0, cur_y_ + 1);
+            return 1;
+        }
+        if (byte == '\r')
+        {
+            setPosition(0, cur_y_);
+            return 1;
+        }
+        if (byte == '\b')
+        {
+            const uint8_t x = cur_x_ > 0 ? cur_x_ - 1 : cols_ - 1;
+            const uint8_t y = cur_x_ > 0 ? cur_y_ : cur_y_ > 0 ? cur_y_ - 1 : rows_ - 1;
+            setPosition(x, y);
+            write(' ');
+            setPosition(x, y);
+            return 1;
+        }
+#endif
+
+#ifdef LCD_USE_BUFFER
+        buffer_[position_++] = byte;
+#else
+        sendByte(byte, true);
+        delayMicroseconds(4);
+#endif
+
+#ifndef LCD_LOW_MEM
+        if (++cur_x_ == cols_)
+            write('\n');
+#endif
+
+        return 1;
+    }
+
+#ifdef LCD_USE_BUFFER
+    void flush() override
+    {
+        sendByte(LCD_CMD_RETURN_HOME);
+        delayMicroseconds(1483);
+
+        for (int i = 0; i < (rows_ == 1 ? 80 : 0x68); i++)
+        {
+            if (rows_ != 1 && i == 0x28)
+            {
+                i = 0x40;
+                sendByte(LCD_CMD_SET_DDRAM_ADDRESS | 0x40);
+            }
+            sendByte(buffer_[i], true);
+            delayMicroseconds(40);
+        }
+    }
+#endif
+
+#ifndef LCD_LOW_MEM
+#ifdef LCD_NO_I2C
+    void setBacklight(const bool on) const
+    {
+        if (BLA_ < 0)
+            return;
+        setPin(BLA_, on);
+    }
+#else
+    void setBacklight(const bool on)
+    {
+        if (BLA_ < 0)
+            return;
+        setPin(BLA_, on);
+        if (i2c_mode_)
+        {
+            Wire.beginTransmission(i2c_addr_);
+            Wire.write(on << 3);
+            Wire.endTransmission(true);
+        }
+    }
+#endif
+#endif
+
+    Lcd2004(const uint8_t RS, const uint8_t E,
+            const uint8_t D0, const uint8_t D1, const uint8_t D2, const uint8_t D3,
+            const uint8_t D4, const uint8_t D5, const uint8_t D6, const uint8_t D7,
+            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1, const bool _internal = false)
+        : RS_(RS), E_(E),
+          D0_(D0), D1_(D1), D2_(D2), D3_(D3),
+          D4_(D4), D5_(D5), D6_(D6), D7_(D7),
+          cols_(cols), rows_(rows)
+#ifndef LCD_LOW_MEM
+          , BLA_(BLA)
+#endif
+#ifndef LCD_NO_I2C
+          , i2c_mode_(_internal)
+#endif
+    {
+#ifndef LCD_NO_I2C
+        if (!i2c_mode_)
+        {
+
+#endif
+        pinMode(RS, OUTPUT);
+        pinMode(E, OUTPUT);
+        pinMode(D0, OUTPUT);
+        pinMode(D1, OUTPUT);
+        pinMode(D2, OUTPUT);
+        pinMode(D3, OUTPUT);
+        pinMode(D4, OUTPUT);
+        pinMode(D5, OUTPUT);
+        pinMode(D6, OUTPUT);
+        pinMode(D7, OUTPUT);
+        pinMode(BLA, OUTPUT);
+#ifndef LCD_NO_I2C
+        }
+#endif
+
+        setPin(E, LOW);
+    }
+
+    Lcd2004(const uint8_t RS, const uint8_t E,
+            const uint8_t D4, const uint8_t D5, const uint8_t D6, const uint8_t D7,
+            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1, const bool _internal = false)
+        : Lcd2004(RS, E,
+                  D4, D5, D6, D7,
+                  D4, D5, D6, D7,
+                  cols, rows, BLA, _internal)
+    {
+        four_bit_mode_ = true;
+    }
+
+#ifndef LCD_NO_I2C
+    Lcd2004(const uint8_t addr,
+            const uint8_t cols, const uint8_t rows)
+        : Lcd2004(0, 2, 4, 5, 6, 7, cols, rows, 3, true)
+    {
+        i2c_data_ = 1 << 3;
+        i2c_addr_ = addr;
+    }
+#endif
+
+    virtual ~Lcd2004() = default;
 };

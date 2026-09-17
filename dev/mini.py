@@ -12,7 +12,6 @@ def generate_groups(pairs):
     print("};")
 
 if __name__ == "__main__":
-    # Пример: пары (латиница, кириллица)
     pairs = [
         ('A', 'А'),
         ('B', 'В'),
