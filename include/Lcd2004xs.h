@@ -12,15 +12,17 @@
 #endif
 
 #define LCD_HW_SLOTS 8
-#define LCD_NO_HW_SLOT LCD_HW_SLOTS
+#define LCD_NO_HW_SLOT 255
 
 class Lcd2004xs : public Lcd2004
 {
 protected:
-    uint8_t bitmap_[LCD_VIRTUAL_SLOTS][8] = {};
+#ifndef LCD_PROGMEM_CHARS
+    uint8_t bitmap_[LCD_VIRTUAL_SLOTS][5] = {};
+#endif
     uint8_t registered_[LCD_VIRTUAL_SLOTS / 8] = {};
 
-    int16_t hwCode_[LCD_HW_SLOTS] = {
+    uint8_t hwCode_[LCD_HW_SLOTS] = {
         LCD_NO_HW_SLOT, LCD_NO_HW_SLOT, LCD_NO_HW_SLOT, LCD_NO_HW_SLOT,
         LCD_NO_HW_SLOT, LCD_NO_HW_SLOT, LCD_NO_HW_SLOT, LCD_NO_HW_SLOT
     };
@@ -38,7 +40,7 @@ protected:
     uint8_t pickSlot() const
     {
         for (uint8_t i = 0; i < LCD_HW_SLOTS; i++)
-            if (hwCode_[i] < 0)
+            if (hwCode_[i] == LCD_NO_HW_SLOT)
                 return i;
 
         uint8_t victim = 0;
@@ -53,9 +55,11 @@ protected:
 public:
     using Lcd2004::Lcd2004;
 
-    void saveCustomChar(const uint8_t code, uint8_t symbol[8]) override
+    void saveCustomChar(const uint8_t code, const uint8_t symbol[5])
     {
-        memcpy(bitmap_[code], symbol, 8);
+#ifndef LCD_PROGMEM_CHARS
+        memcpy(bitmap_[code], symbol, 5);
+#endif
         bitSet(registered_[code / 8], code % 8);
     }
 
@@ -68,7 +72,7 @@ public:
             hwCode_[slot] = LCD_NO_HW_SLOT;
     }
 
-    uint8_t loadVirtualChar(const uint8_t code)
+    uint8_t loadVirtualChar(uint8_t code)
     {
         const auto slot = findHwSlot(code);
         if (slot != LCD_NO_HW_SLOT)
@@ -80,6 +84,11 @@ public:
         const auto newSlot = pickSlot();
         hwCode_[newSlot] = code;
         touch(newSlot);
+#ifdef LCD_PROGMEM_CHARS
+        uint8_t bitmap_[5][1];
+        memcpy_P(bitmap_, LCD_PROGMEM_CHARS + code * 5, 5);
+        code = 0;
+#endif
         Lcd2004::saveCustomChar(newSlot, bitmap_[code]);
         return newSlot;
     }

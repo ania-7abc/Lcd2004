@@ -222,15 +222,21 @@ public:
     }
 
 #ifndef LCD_LOW_MEM
-    virtual void saveCustomChar(const uint8_t code, uint8_t symbol[8])
+    void saveCustomChar(const uint8_t code, const uint8_t symbol[5])
     {
         sendByte(LCD_CMD_SET_CGRAM_ADDRESS | (code % 8) << 3);
-        for (uint8_t i = 0; i < 8; i++)
-            sendByte(symbol[i], true);
+
+        for (uint8_t row = 0; row < 8; row++)
+        {
+            uint8_t row_val = 0;
+            for (uint8_t col = 0; col < 5; col++)
+                row_val |= (symbol[4 - col] >> row & 1) << col;
+
+            sendByte(row_val, true);
+        }
 
         setPosition(cur_x_, cur_y_); // Set write to DDRAM, but not CGRAM
     }
-#endif
 
 protected:
     /**
@@ -239,6 +245,7 @@ protected:
      * @return Continue outputting the character?
      */
     virtual bool preWrite(uint8_t& byte) { return true; }
+#endif
 
 public:
     size_t write(uint8_t byte) override
@@ -344,19 +351,18 @@ public:
 #ifndef LCD_NO_I2C
         if (!i2c_mode_)
         {
-
 #endif
-        pinMode(RS, OUTPUT);
-        pinMode(E, OUTPUT);
-        pinMode(D0, OUTPUT);
-        pinMode(D1, OUTPUT);
-        pinMode(D2, OUTPUT);
-        pinMode(D3, OUTPUT);
-        pinMode(D4, OUTPUT);
-        pinMode(D5, OUTPUT);
-        pinMode(D6, OUTPUT);
-        pinMode(D7, OUTPUT);
-        pinMode(BLA, OUTPUT);
+            pinMode(RS, OUTPUT);
+            pinMode(E, OUTPUT);
+            pinMode(D0, OUTPUT);
+            pinMode(D1, OUTPUT);
+            pinMode(D2, OUTPUT);
+            pinMode(D3, OUTPUT);
+            pinMode(D4, OUTPUT);
+            pinMode(D5, OUTPUT);
+            pinMode(D6, OUTPUT);
+            pinMode(D7, OUTPUT);
+            pinMode(BLA, OUTPUT);
 #ifndef LCD_NO_I2C
         }
 #endif

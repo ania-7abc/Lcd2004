@@ -1,47 +1,30 @@
 # Installation
 
+## Introduction
+
+This page explains how to add the Lcd2004 library to your project. The steps differ for PlatformIO and Arduino IDE. The library itself has no mandatory dependencies for basic use. If you plan to use the graphics class, you also need the GyverGFX library
+
 ## PlatformIO
 
-Add the library to `platformio.ini`
+In PlatformIO, add the library to your `platformio.ini` file under `lib_deps`
 
 ```ini
 lib_deps =
     ania-7abc/Lcd2004
 ```
 
-Then include the header you need in your source
-
-```cpp
-#include <Lcd2004.h>
-```
+Then build your project. PlatformIO will download and install the library automatically
 
 ## Arduino IDE
 
-1. Download the archive from the [latest release](https://github.com/ania-7abc/Lcd2004/releases/latest)
-2. Open *Sketch → Include Library → Add .ZIP Library*
-3. Pick the downloaded file
+For Arduino IDE, you need to download the library as a ZIP file. Go to the PlatformIO registry page for `ania-7abc/Lcd2004` and use the download option to get the ZIP. Then open Arduino IDE, go to Sketch > Include Library > Add .ZIP Library... and select the downloaded file
 
-The library shows up under *Sketch → Include Library* afterwards
+## Dependencies
 
-## Manual install
+If you want to use the graphics features, install the GyverGFX library as well. It is available through the Arduino Library Manager and PlatformIO. The other classes have no external dependencies
 
-Copy the `Lcd2004` folder into your project's `lib` directory (PlatformIO) or into `~/Arduino/libraries` (Arduino IDE)
+## See also
 
-## Headers
-
-The library ships four headers. Include only the one you need, since each pulls in more code than the previous one
-
-| Header         | Adds                                   |
-|----------------|----------------------------------------|
-| `Lcd2004.h`    | Core driver, parallel and I2C          |
-| `Lcd2004xs.h`  | Virtual glyph slots on top of the core |
-| `Lcd2004ru.h`  | UTF-8 parser and Cyrillic glyphs       |
-| `Lcd2004gfx.h` | Pixel graphics on top of virtual slots |
-
-`Lcd2004gfx.h` needs the [GyverGFX](https://github.com/GyverLibs/GyverGFX) library installed. The other three have no external dependencies
-
-## Next
-
-- [Wiring](wiring.md) for a parallel display
-- [I2C quickstart](i2c-quickstart.md) for a PCF8574 backpack
-- [Hello, world](hello-world.md) for the first sketch
+- [Getting started index](index.md)
+- [Quickstart](quickstart.md)
+- [Configuration index](../configuration/index.md)
