@@ -52,12 +52,18 @@ public:
 
             // @formatter:off
 #ifdef LCD_GFX_LARGE
-            if (i & 32) { symbol[0] |= 0b11000; symbol[1] |= 0b11000; }
-            if (i & 16) { symbol[3] |= 0b11000; symbol[4] |= 0b11000; }
-            if (i & 8) { symbol[6] |= 0b11000; symbol[7] |= 0b11000; }
-            if (i & 4) { symbol[0] |= 0b00011; symbol[1] |= 0b00011; }
-            if (i & 2) { symbol[3] |= 0b00011; symbol[4] |= 0b00011; }
-            if (i & 1) { symbol[6] |= 0b00011; symbol[7] |= 0b00011; }
+            if (i & 32) { symbol[0] |= 0b00000011;
+ symbol[1] |= 0b00000011; }
+            if (i & 16) { symbol[0] |= 0b00011000;
+ symbol[1] |= 0b00011000; }
+            if (i & 8) { symbol[0] |= 0b11000000;
+ symbol[1] |= 0b11000000; }
+            if (i & 4) { symbol[3] |= 0b00000011;
+ symbol[4] |= 0b00000011; }
+            if (i & 2) { symbol[3] |= 0b00011000;
+ symbol[4] |= 0b00011000; }
+            if (i & 1) { symbol[3] |= 0b11000000;
+ symbol[4] |= 0b11000000; }
 #else
             if (i & 8) { symbol[1] |= 0b11000; symbol[2] |= 0b11000; }
             if (i & 4) { symbol[5] |= 0b11000; symbol[6] |= 0b11000; }
