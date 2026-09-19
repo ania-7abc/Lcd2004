@@ -1,11 +1,14 @@
 #include <Lcd2004.h>
 
-// RS, E, D4, D5, D6, D7, cols, rows
-Lcd2004 lcd(12, 11, 5, 4, 3, 2, 20, 4);
+// I2C address, cols, rows
+Lcd2004 lcd(0x27, 16, 2);
 
-void setup() {
+void setup()
+{
     lcd.init();
     lcd.println("Hello, world!");
 }
 
-void loop() {}
+void loop()
+{
+}

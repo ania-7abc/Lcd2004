@@ -3,25 +3,16 @@
 Lcd2004 lcd(12, 11, 5, 4, 3, 2, 20, 4);
 
 // A filled square with a hollow center
-uint8_t square[8] = {
-    0b11111,
-    0b11111,
-    0b11011,
-    0b11011,
-    0b11011,
-    0b11011,
-    0b11111,
-    0b11111,
-};
+constexpr uint8_t Square[] = {0xFF, 0xFF, 0xC3, 0xFF, 0xFF};
 
-void setup() {
+void setup()
+{
     lcd.init();
 
-    lcd.saveCustomChar(0, square);
-
-    lcd.setPosition(0, 0);
-    lcd.print("Glyph: ");
-    lcd.write(uint8_t(0));
+    lcd.saveCustomChar(1, Square);
+    lcd.println("Glyph: \1");
 }
 
-void loop() {}
+void loop()
+{
+}
