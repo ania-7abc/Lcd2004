@@ -77,18 +77,15 @@ class Lcd2004ru : public Lcd2004xs
         // @formatter:on
     }
 
-protected:
-    bool preWrite(uint8_t& byte) override
+public:
+    using Lcd2004xs::Lcd2004xs;
+
+    size_t write(uint8_t byte) override
     {
         if (!parseUtf8(byte))
-            return false;
-        if (codepoint == 0xFFFD)
-        {
-            byte = '?';
-            return true;
-        }
+            return 1;
         if (codepoint < LCD_RU_START || codepoint > LCD_RU_END)
-            return true;
+            return Lcd2004xs::write(byte);
 
         const uint8_t index = pgm_read_byte(LcdRuIndexes + codepoint - LCD_RU_START);
         if (index <= 9)
@@ -103,11 +100,9 @@ protected:
             byte = index - 38 + 0x61;
         else
             byte = loadVirtualChar(index - 64);
-        return true;
-    }
 
-public:
-    using Lcd2004xs::Lcd2004xs;
+        return Lcd2004xs::write(byte);
+    }
 
     void init()
     {

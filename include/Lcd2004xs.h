@@ -31,6 +31,8 @@ protected:
 
     uint8_t findHwSlot(const uint8_t code) const
     {
+        if (!bitRead(registered_[code / 8], code % 8))
+            return LCD_NO_HW_SLOT;
         for (uint8_t i = 0; i < LCD_HW_SLOTS; i++)
             if (hwCode_[i] == static_cast<int16_t>(code))
                 return i;
@@ -55,7 +57,7 @@ protected:
 public:
     using Lcd2004::Lcd2004;
 
-    void saveCustomChar(const uint8_t code, const uint8_t symbol[5])
+    void saveCustomChar(const uint8_t code, const uint8_t symbol[5]) override
     {
 #ifndef LCD_PROGMEM_CHARS
         memcpy(bitmap_[code], symbol, 5);
@@ -65,11 +67,11 @@ public:
 
     void freeCustomChar(const uint8_t code)
     {
-        bitClear(registered_[code / 8], code % 8);
-
         const auto slot = findHwSlot(code);
         if (slot != LCD_NO_HW_SLOT)
             hwCode_[slot] = LCD_NO_HW_SLOT;
+
+        bitClear(registered_[code / 8], code % 8);
     }
 
     uint8_t loadVirtualChar(uint8_t code)
@@ -85,11 +87,12 @@ public:
         hwCode_[newSlot] = code;
         touch(newSlot);
 #ifdef LCD_PROGMEM_CHARS
-        uint8_t bitmap_[5][1];
-        memcpy_P(bitmap_, LCD_PROGMEM_CHARS + code * 5, 5);
-        code = 0;
-#endif
+        uint8_t symbol_[5];
+        memcpy_P(symbol_, LCD_PROGMEM_CHARS + code * 5, 5);
+        Lcd2004::saveCustomChar(newSlot, symbol_);
+#else
         Lcd2004::saveCustomChar(newSlot, bitmap_[code]);
+#endif
         return newSlot;
     }
 

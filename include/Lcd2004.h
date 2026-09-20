@@ -24,17 +24,14 @@ protected:
     uint8_t RS_, E_,
             D0_, D1_, D2_, D3_,
             D4_, D5_, D6_, D7_;
+    int8_t BLA_; // if < 0 no backlight control
 
     uint8_t cols_, rows_; // Resolution
-
-#ifndef LCD_LOW_MEM
-    int8_t BLA_; // if < 0 no backlight control
-#endif
 
     bool four_bit_mode_ = false;
 
 #ifndef LCD_NO_I2C
-    bool i2c_mode_;
+    bool i2c_mode_ = false;
     uint8_t i2c_data_ = 0;
     uint8_t i2c_addr_ = 0;
 #endif
@@ -78,11 +75,6 @@ protected:
         if (four_bit_mode_)
             pulseEnable();
 
-        sendNibble(byte);
-    }
-
-    void sendNibble(const uint8_t byte)
-    {
         setPin(D0_, byte & 1);
         setPin(D1_, byte & 2);
         setPin(D2_, byte & 4);
@@ -91,43 +83,28 @@ protected:
         pulseEnable();
     }
 
-#ifndef LCD_NO_I2C
     void pulseEnable()
     {
+#ifndef LCD_NO_I2C
         if (i2c_mode_)
         {
-            setPin(E_, HIGH);
             Wire.beginTransmission(i2c_addr_);
             Wire.write(i2c_data_);
-            Wire.endTransmission(true);
-
             delayMicroseconds(3);
-
-            setPin(E_, LOW);
-            Wire.beginTransmission(i2c_addr_);
-            Wire.write(i2c_data_);
+            Wire.write(i2c_data_ & 1 << 3);
             Wire.endTransmission(true);
 
             delayMicroseconds(37);
             return;
         }
-
-        setPin(E_, HIGH);
-        delayMicroseconds(3);
-        setPin(E_, LOW);
-
-        delayMicroseconds(37);
-    }
-#else
-    void pulseEnable() const
-    {
-        setPin(E_, HIGH);
-        delayMicroseconds(3);
-        setPin(E_, LOW);
-
-        delayMicroseconds(37);
-    }
 #endif
+
+        setPin(E_, HIGH);
+        delayMicroseconds(3);
+        setPin(E_, LOW);
+
+        delayMicroseconds(37);
+    }
 
 #ifndef LCD_LOW_MEM
     void displayControlCmd()
@@ -144,12 +121,17 @@ public:
         if (four_bit_mode_)
         {
             setPin(RS_, LOW);
-            sendNibble(3);
+            setPin(D0_, true);
+            setPin(D1_, true);
+            setPin(D2_, false);
+            setPin(D3_, false);
+            pulseEnable();
             delayMicroseconds(4063);
-            sendNibble(3);
+            pulseEnable();
             delayMicroseconds(63);
-            sendNibble(3);
-            sendNibble(2);
+            pulseEnable();
+            setPin(D0_, false);
+            pulseEnable();
         }
 
         sendByte(LCD_CMD_FUNCTION_SET | !four_bit_mode_ << 4 | (rows_ != 1) << 3 | font << 2);
@@ -222,7 +204,7 @@ public:
     }
 
 #ifndef LCD_LOW_MEM
-    void saveCustomChar(const uint8_t code, const uint8_t symbol[5])
+    virtual void saveCustomChar(const uint8_t code, const uint8_t symbol[5])
     {
         sendByte(LCD_CMD_SET_CGRAM_ADDRESS | (code % 8) << 3);
 
@@ -237,23 +219,11 @@ public:
 
         setPosition(cur_x_, cur_y_); // Set write to DDRAM, but not CGRAM
     }
-
-protected:
-    /**
-     * Called before outputting a character
-     * @param byte The character to be output
-     * @return Continue outputting the character?
-     */
-    virtual bool preWrite(uint8_t& byte) { return true; }
 #endif
 
-public:
     size_t write(uint8_t byte) override
     {
 #ifndef LCD_LOW_MEM
-        if (!preWrite(byte))
-            return 1;
-
         if (byte == '\n')
         {
             setPosition(0, cur_y_ + 1);
@@ -309,85 +279,65 @@ public:
     }
 #endif
 
-#ifndef LCD_LOW_MEM
-#ifdef LCD_NO_I2C
-    void setBacklight(const bool on) const
-    {
-        if (BLA_ < 0)
-            return;
-        setPin(BLA_, on);
-    }
-#else
     void setBacklight(const bool on)
     {
         if (BLA_ < 0)
             return;
         setPin(BLA_, on);
+#ifndef LCD_NO_I2C
         if (i2c_mode_)
         {
             Wire.beginTransmission(i2c_addr_);
-            Wire.write(on << 3);
+            Wire.write(on << BLA_);
             Wire.endTransmission(true);
         }
+#endif
     }
-#endif
-#endif
 
     Lcd2004(const uint8_t RS, const uint8_t E,
             const uint8_t D0, const uint8_t D1, const uint8_t D2, const uint8_t D3,
             const uint8_t D4, const uint8_t D5, const uint8_t D6, const uint8_t D7,
-            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1, const bool _internal = false)
+            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1
+    )
         : RS_(RS), E_(E),
           D0_(D0), D1_(D1), D2_(D2), D3_(D3),
           D4_(D4), D5_(D5), D6_(D6), D7_(D7),
-          cols_(cols), rows_(rows)
-#ifndef LCD_LOW_MEM
-          , BLA_(BLA)
-#endif
-#ifndef LCD_NO_I2C
-          , i2c_mode_(_internal)
-#endif
+          BLA_(BLA), cols_(cols), rows_(rows)
     {
-#ifndef LCD_NO_I2C
-        if (!i2c_mode_)
-        {
-#endif
-            pinMode(RS, OUTPUT);
-            pinMode(E, OUTPUT);
-            pinMode(D0, OUTPUT);
-            pinMode(D1, OUTPUT);
-            pinMode(D2, OUTPUT);
-            pinMode(D3, OUTPUT);
-            pinMode(D4, OUTPUT);
-            pinMode(D5, OUTPUT);
-            pinMode(D6, OUTPUT);
-            pinMode(D7, OUTPUT);
-            pinMode(BLA, OUTPUT);
-#ifndef LCD_NO_I2C
-        }
-#endif
-
+        pinMode(RS_, OUTPUT);
+        pinMode(E_, OUTPUT);
+        pinMode(D0_, OUTPUT);
+        pinMode(D1_, OUTPUT);
+        pinMode(D2_, OUTPUT);
+        pinMode(D3_, OUTPUT);
+        pinMode(D4_, OUTPUT);
+        pinMode(D5_, OUTPUT);
+        pinMode(D6_, OUTPUT);
+        pinMode(D7_, OUTPUT);
+        if (BLA_ >= 0)
+            pinMode(BLA_, OUTPUT);
         setPin(E, LOW);
     }
 
     Lcd2004(const uint8_t RS, const uint8_t E,
             const uint8_t D4, const uint8_t D5, const uint8_t D6, const uint8_t D7,
-            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1, const bool _internal = false)
+            const uint8_t cols, const uint8_t rows, const int8_t BLA = -1)
         : Lcd2004(RS, E,
                   D4, D5, D6, D7,
                   D4, D5, D6, D7,
-                  cols, rows, BLA, _internal)
+                  cols, rows, BLA)
     {
         four_bit_mode_ = true;
     }
 
 #ifndef LCD_NO_I2C
-    Lcd2004(const uint8_t addr,
-            const uint8_t cols, const uint8_t rows)
-        : Lcd2004(0, 2, 4, 5, 6, 7, cols, rows, 3, true)
+    Lcd2004(const uint8_t addr, const uint8_t cols, const uint8_t rows)
+        : RS_(0), E_(2),
+          D0_(4), D1_(5), D2_(6), D3_(7),
+          D4_(4), D5_(5), D6_(6), D7_(7),
+          BLA_(3), cols_(cols), rows_(rows),
+          four_bit_mode_(true), i2c_mode_(true), i2c_data_(1 << BLA_ | 1 << E_), i2c_addr_(addr)
     {
-        i2c_data_ = 1 << 3;
-        i2c_addr_ = addr;
     }
 #endif
 
