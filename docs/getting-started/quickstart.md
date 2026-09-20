@@ -23,23 +23,16 @@ The I2C address is often 0x27 or 0x3F. If you are not sure, run an I2C scanner s
 
 Connect the display directly to your board. Also, you need a contrast potentiometer connected to V0
 
-| LCD | Arduino |
-|-----|---------|
-| GND | GND     |
-| VDD | 5V      |
-| RS  | 12      |
-| RW  | GND     |
-| E   | 11      |
-| D0  | -       |
-| D1  | -       |
-| D2  | -       |
-| D3  | -       |
-| D4  | 5       |
-| D5  | 4       |
-| D6  | 3       |
-| D7  | 2       |
-| BLA | 5V      |
-| BLK | GND     |
+| LCD | Arduino | LCD | Arduino |
+|-----|---------|-----|---------|
+| GND | GND     | D0  | -       |
+| VDD | 5V      | D1  | -       |
+| RS  | 12      | D2  | -       |
+| RW  | GND     | D3  | -       |
+| E   | 11      | D4  | 5       |
+| BLA | 5V      | D5  | 4       |
+| BLK | GND     | D6  | 3       |
+|     |         | D7  | 2       |
 
 Adjust the pins to match your wiring
 
