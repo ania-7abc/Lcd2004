@@ -1,9 +1,13 @@
 # Lcd2004
 
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/ania-7abc/library/Lcd2004.svg)](https://registry.platformio.org/libraries/ania-7abc/Lcd2004)
+[![Arduino Library Manager](https://www.ardu-badge.com/badge/Lcd2004.svg)](https://www.ardu-badge.com/Lcd2004)
 [![GitHub License](https://img.shields.io/github/license/ania-7abc/Lcd2004)](https://github.com/ania-7abc/Lcd2004/blob/main/LICENSE)
 [![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/ania-7abc/Lcd2004/latest/total)](https://github.com/ania-7abc/Lcd2004/releases/latest)
+![GitHub last commit](https://img.shields.io/github/last-commit/ania-7abc/Lcd2004)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/ania-7abc/Lcd2004)
+[![Build Examples](https://github.com/ania-7abc/Lcd2004/actions/workflows/build.yml/badge.svg)](https://github.com/ania-7abc/Lcd2004/actions/workflows/build.yml)
+[![Documentation](https://github.com/ania-7abc/Lcd2004/actions/workflows/docs.yml/badge.svg)](https://ania-7abc.github.io/Lcd2004/)
 
 A clean, lightweight library for liquid crystal displays that is easy to set up
 
@@ -16,8 +20,7 @@ lib_deps =
     ania-7abc/Lcd2004
 ```
 
-**Arduino IDE** - grab the archive from the [latest release](https://github.com/ania-7abc/Lcd2004/releases/latest) and
-use *Sketch → Include Library → Add .ZIP Library*
+**Arduino IDE** - search for `Lcd2004` in *Sketch → Include Library → Manage Libraries...* (Library Manager), or grab the archive from the [latest release](https://github.com/ania-7abc/Lcd2004/releases/latest) and use *Sketch → Include Library → Add .ZIP Library*
 
 ## Hello, world!
 

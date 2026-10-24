@@ -1,0 +1,86 @@
+name: Bug report
+description: Report a bug in Lcd2004 library
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the form below to help us reproduce it.
+  - type: input
+    id: library_version
+    attributes:
+      label: Library version
+      description: Version from library.json/library.properties or commit hash
+      placeholder: "2.3.2"
+    validations:
+      required: true
+  - type: input
+    id: mcu
+    attributes:
+      label: MCU/Board
+      description: e.g. Arduino Uno, Nano, ESP32, STM32
+      placeholder: "Arduino Uno"
+    validations:
+      required: true
+  - type: input
+    id: sdk
+    attributes:
+      label: Development environment
+      description: Arduino IDE / PlatformIO / version
+      placeholder: "PlatformIO Core 6.1.18"
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection type
+      options:
+        - 4-bit parallel
+        - 8-bit parallel
+        - I2C (PCF8574)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: display
+    attributes:
+      label: Display type
+      placeholder: "20x4, 16x2"
+    validations:
+      required: true
+  - type: dropdown
+    id: class_used
+    attributes:
+      label: Class used
+      options:
+        - Lcd2004
+        - Lcd2004xs
+        - Lcd2004ru
+        - Lcd2004gfx
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal reproducing sketch
+      description: Include only what's needed to reproduce the bug
+      render: cpp
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected vs actual behavior
+      description: What should happen and what actually happens
+    validations:
+      required: true
+  - type: textarea
+    id: macros
+    attributes:
+      label: Compile-time macros
+      description: Any #define before including headers (LCD_NO_I2C, LCD_LOW_MEM, LCD_USE_BUFFER, etc.)
+      render: cpp
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Wiring, photos, serial logs if any

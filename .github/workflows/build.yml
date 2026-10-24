@@ -1,0 +1,35 @@
+name: Build Examples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fqbn:
+          - arduino:avr:uno
+          - arduino:avr:nano
+          - arduino:avr:mega
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sketch-paths: |
+            - examples
+          fqbn: ${{ matrix.fqbn }}
+          libraries: |
+            - source-path: ./
+            - name: GyverGFX
+          enable-deltas-report: true
