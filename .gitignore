@@ -5,7 +5,6 @@
 **/.vscode/extensions.json
 
 **.tmp
-src/
 
 site/
 dist/

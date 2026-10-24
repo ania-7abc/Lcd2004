@@ -1,7 +1,7 @@
 {
   "name": "Lcd2004",
-  "version": "2.3.3",
-  "description": "A clear, lightweight library for liquid crystal displays that is easy to set up.",
+  "version": "2.3.4",
+  "description": "A clear, lightweight library for liquid crystal displays that is easy to set up",
   "keywords": [
     "lcd",
     "display",
